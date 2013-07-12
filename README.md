@@ -1,4 +1,4 @@
 tephra2
 =======
 
-new inversion option using the tephras dispersion model
+A new inversion option using the tephra2 dispersion model
