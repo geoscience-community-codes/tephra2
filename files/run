@@ -1,0 +1,34 @@
+##########################################
+# Set these three input parameters before running an inversion
+# This is the data, easting northing elevation kg/m^2
+INPUT=colima_phi0.utm
+# This is the inversion configuration file
+CONF=colima.conf
+# This is the wind file to be used for the inversion if a FIXED_WIND is chosen
+WIND=../Jan2013/wind3
+##########################################
+date
+## Do the inversion
+mpirun n4-7 ../src_2012.12.18/tephra2012_inversion $CONF $INPUT $WIND
+##
+date
+## Generate a plot of the plume model (beta function)
+perl ../scripts/plume.gmt.pl plume.dat plume.eps
+##
+## Plot equiline plot (calculated vs. observed)
+perl ../scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps
+##
+## Write out a configuration file for tephra2
+perl ../scripts/write_conf.pl parameters.README tephra2.conf 75 75
+##
+## Generate a wind diagram
+perl ../scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps
+##
+## Run the tephra2 forward model
+../src_2012.12.18/tephra2-2012 tephra2.conf ../colima.data.grid wind_levels.out >tephra2.out
+##
+## Parse the output data and create a plotting file
+perl ../scripts/parse_tephra.out.pl tephra2.out > tephra2.out.xyz
+##
+## Plot a contour map of the tephra deposit from tephra2 model
+perl ../scripts/plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps
