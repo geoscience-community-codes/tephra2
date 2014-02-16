@@ -13,14 +13,15 @@ void set_global_values(FILE *);
 /*void set_eruption_values(ERUPTION *erupt);*/
 void set_eruption_values(ERUPTION *, WIND *);
 int get_points(FILE *);
-void printout_model(void);
+void printout_model(double []);
 void printout_points(void);
 void printout_parameters(double);
 void print_for_stats(double);
-double set_variance(void);
-double chi_squared(void);
-double rmse(void);
-double (*fit)(void);
+double set_variance(FILE *, int, POINT *);
+double chi_squared(FILE *, int, POINT *);
+double rmse(FILE *, int, POINT *);
+double log_test(FILE *, int, POINT *);
+double (*fit)(FILE *, int, POINT *);
 
 double phi2m( double);
 double particle_density (double, double, double);

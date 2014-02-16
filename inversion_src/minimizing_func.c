@@ -13,23 +13,16 @@
 int COL_STEPS;
 int PART_STEPS;
 int FIT_TEST;
-static unsigned int SEED;
-/*
-double WIND_INTERVAL;
 int WIND_LEVELS;
-int WIND_DAYS = 1;
-int WIND_COLUMNS = 3;
-double LITHIC_DENSITY = 2000.0;
-double PUMICE_DENSITY = 400.0;
-int PLUME_MODEL = 2;
-
-static double variance = 0.0;
-*/
+int INV_WIND_LEVELS;
+static unsigned int SEED;
 
 /*define the following data structures for the code
   full descriptions are found in common_structures.h */
 static ERUPTION e;
-static WIND **W;
+static WIND *W;
+static WIND *FW;
+
 /*static STATS stats; */
 
 static int num_pts = 0; /*total number of points used in the analysis */
@@ -59,18 +52,21 @@ void test_bounds(int param, double *try, double bound) {
 #ifdef DEBUG
   if (param == MAX_COL_HT) fprintf(log_file, "\n");
   fprintf(log_file, "Param=%d ", param);
-#endif
 
-  if (*try < LO_PARAM(param)) {
-    *try = LO_PARAM(param);
-
-  } else if (*try > HI_PARAM(param)) {
-    *try = HI_PARAM(param);
-
+  if (!FIXED_WIND) { 
+  	if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
+  	else if (*try > HI_PARAM(param)) *try = HI_PARAM(param);
   }
-
+  else {
+    if (param < WIND_SPEED) {
+    	if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
+  		else if (*try > HI_PARAM(param)) *try = HI_PARAM(param);
+  	}
+  }
+  #endif
+ if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
+ else if (*try > HI_PARAM(param)) *try = HI_PARAM(param); 
 }
-
 /****************************************************************
 FUNCTION: init_globals
 DESCRIPTION: This function read a configuration file
@@ -85,7 +81,7 @@ int init_globals(char *config_file) {
   char line[MAX_LINE];
   char space[4] = "\n\t ";
   char *token;
-  int i, WIND_DAYS=1, WIND_LEVELS;
+  int WIND_LEVELS;
 
   /* Find out how many processes are being used */
   MPI_Comm_size(MPI_COMM_WORLD, &procs);
@@ -156,6 +152,10 @@ int init_globals(char *config_file) {
         fit = rmse;
         fprintf(log_file, "Goodness-of-fit test=[%d]%s\n", FIT_TEST, "root-mean-squared-error test");
       }
+      else if (FIT_TEST == LOG_TEST) {
+      	fit = log_test;
+      	fprintf(log_file, "Goodness-of-fit test=[%d]%s\n", FIT_TEST, "Tokyo log test");
+      }
     }
     else if (!strncmp(token, "DIFFUSION_COEFFICIENT", strlen("DIFFUSION_COEFFICIENT"))) {
       token = strtok_r(NULL,space,ptr1);
@@ -223,14 +223,6 @@ int init_globals(char *config_file) {
       e.max_plume_elevation = _HI[MAX_COL_HT];
       fprintf(log_file, "MAX_PLUME_ELEVATION=%.0f to %.0f\n", _LO[MAX_COL_HT], _HI[MAX_COL_HT]);
     }
-    else if (!strncmp(token, "PLUME_RATIO", strlen("PLUME_RATIO"))) {
-      token = strtok_r(NULL,space,ptr1);
-       _LO[COL_RATIO] = strtod(token, NULL);
-      token = strtok_r(NULL,space,ptr1);
-      _HI[COL_RATIO] = strtod(token, NULL);
-      e.plume_ratio = _LO[COL_RATIO];
-      fprintf(log_file, "PLUME_RATIO=%.2f to %.2f\n", _LO[COL_RATIO], _HI[COL_RATIO]);
-    }
     else if (!strncmp(token, "ALPHA", strlen("ALPHA"))) {
        token = strtok_r(NULL,space,ptr1);
       _LO[ALPHAP] = strtod(token, NULL);
@@ -282,82 +274,53 @@ int init_globals(char *config_file) {
     }
     else if (!strncmp(token, "WIND_DIRECTION", strlen("WIND_DIRECTION"))) {
       token = strtok_r(NULL,space,ptr1);
-      _LO[WIND_DIRECTION] = strtod(token, NULL);
-      _LO[WIND_DIRECTION] *= DEG2RAD;
+      _LO[WIND_DIRECTION] = strtod(token, NULL);  
       token = strtok_r(NULL,space,ptr1);
       _HI[WIND_DIRECTION] = strtod(token, NULL);
       _HI[WIND_DIRECTION] *= DEG2RAD;
+      _LO[WIND_DIRECTION] *= DEG2RAD;
       fprintf(log_file, "WIND_DIRECTION=%.0f to %.0f\n", _LO[WIND_DIRECTION], _HI[WIND_DIRECTION]);
+    }
+    else if (!strncmp(token, "WIND_LEVELS", strlen("WIND_LEVELS"))) {
+      token = strtok_r(NULL, space, ptr1);
+      INV_WIND_LEVELS = (int)atoi(token);
+      fprintf(log_file, "INV_WIND_LEVELS = %d\n", INV_WIND_LEVELS);
+      NUM_OF_PARAMS = (int) (2 * INV_WIND_LEVELS); 
+      NUM_OF_PARAMS += (LAST_PARAM - 2);
+      fprintf(log_file, "NUM_OF_PARAMS=%d\n", NUM_OF_PARAMS);
+      NUM_OF_VERTICES = NUM_OF_PARAMS + 1;
+    }
+    else if (!strncmp(token, "FIXED_WIND", strlen("FIXED_WIND"))) {
+      token = strtok_r(NULL, space, ptr1);
+      FIXED_WIND = (int)atoi(token);
     }
     else continue;
   }
 	fflush(log_file);
-	WIND_DAYS = 1;
 	WIND_LEVELS = COL_STEPS + 1; 
-  /* WIND_LEVELS = (_HI[MAX_COL_HT]/1000) + 1; */
-  if (!my_rank) fprintf(stderr, "WIND_LEVELS=%d\n", WIND_LEVELS);
-  
-  /*WIND_INTERVAL = (_HI[MAX_COL_HT] - e.vent_elevation)/(double)COL_STEPS;*/
- /* WIND_INTERVAL = (_HI[MAX_COL_HT] - e.vent_elevation) /1000; */
-
+	fprintf(log_file, "FIXED_WIND = %s\n", (FIXED_WIND) ? "TRUE" : "FALSE");
+  	if (!my_rank) fprintf(stderr, "WIND_LEVELS=%d\n", WIND_LEVELS);
 
   set_global_values(log_file);
-
-  W = (WIND**)GC_MALLOC((size_t)WIND_DAYS * sizeof(WIND));
+  
+  W = (WIND*)GC_MALLOC((size_t)WIND_LEVELS*sizeof(WIND));
   if (W == NULL) {
-    fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for columns of wind data:[%s]\n",
-	    my_rank, procs, strerror(errno));
-    return -1;
+      fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for W (wind levels):[%s]\n",
+	      my_rank, procs, strerror(errno));
+      return ERROR;
   }
-  else {
-    for (i=0; i < WIND_DAYS; i++) {
-      W[i] = (WIND *)GC_MALLOC((size_t)WIND_LEVELS * sizeof(WIND));
-      if (W[i] == NULL) {
-				fprintf(stderr,
-				"[%d-of-%d]\tCannot malloc memory for singel row of wind data %d:[%s]\n",
-				my_rank, procs, i, strerror(errno));
-				return -1;
-      }
-    }
-  }
-  /* Set the Wind heights as they remain constant throughtout the program.
-   * The heights just refer to the integration steps, plus one more level,
-   * The level between the vent height and the ground.
-   *
-    for (i=0; i < WIND_DAYS; i++) {
-        W[i][0].wind_height =  e.vent_elevation;
-	    if (!my_rank) fprintf (log_file, "WIND HEIGHTS: %.1f ", W[i][0].wind_height);
-        for (j=1; j < WIND_LEVELS; j++) {
-            W[i][j].wind_height = W[i][j-1].wind_height + WIND_INTERVAL;
-		    if (!my_rank) fprintf (log_file, "%.1f ", W[i][j].wind_height);
-	    }
-    }
-  if (!my_rank) fprintf (stderr, "\n");
-
-  for (i=0; i < WIND_DAYS; i++)
-    W[i][0].wind_height =  e.vent_elevation;
-    for (j=1; j < WIND_LEVELS; j++)
-      W[i][j].wind_height = (double)(j * WIND_INTERVAL);
-*/
-
-
-  NUM_OF_PARAMS = (int) (2 * WIND_DAYS * WIND_LEVELS);
-  NUM_OF_PARAMS += (LAST_PARAM - 2);
-  fprintf(log_file, "NUM_OF_PARAMS=%d\n", NUM_OF_PARAMS);
-  NUM_OF_VERTICES = NUM_OF_PARAMS + 1;
-
   (void) fclose(in_config);
-  return 0;
+  return FALSE;
 }
 
 
 
 /*****************************************************************
 FUNCTION:  get_points
-DESCRIPTION:  This function reads easting northing and grain size
-distribution  into a POINTS array.
+DESCRIPTION:  This function opens the grid file and reads
+easting northing elevation mass into a POINTS array.
 
-   easting northing mass/kg^2 median sigma)
+   easting northing mass/kg^2)
 
 The total number of points read are divided up between beowulf
 nodes so that each node can calulate the grainsize distribution
@@ -401,13 +364,13 @@ int get_points(FILE *in) {
     if (displ == NULL) {
       fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for displ array:[%s]\n",
 	      my_rank, procs, strerror(errno));
-      return -1;
+      return ERROR;
     }
     recv_ct = (int*)GC_MALLOC((size_t)procs*sizeof(int));
     if (recv_ct == NULL) {
       fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for recv_ct array:[%s]\n",
 	      my_rank, procs, strerror(errno));
-      return -1;
+      return ERROR;
     }
 
     displ[0] = 0;
@@ -424,7 +387,7 @@ int get_points(FILE *in) {
     if (p_all == NULL) {
       fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for p_all:[%s]\n",
 	      my_rank, procs, strerror(errno));
-      return -1;
+      return ERROR;
     }
   }
 
@@ -434,7 +397,7 @@ int get_points(FILE *in) {
   if (pt == NULL) {
     fprintf(stderr, "[%d-of-%d]\tCannot malloc memory for eruptions:[%s]\n",
             my_rank, procs, strerror(errno));
-    return -1;
+    return ERROR;
   }
 
   /* for ( i=0; i < num_pts; i++) { */
@@ -454,8 +417,9 @@ int get_points(FILE *in) {
 	if (ret == EOF && errno == EINTR) continue;
 	fprintf(stderr, "[%d-of-%d]\t[line=%d,ret=%d] Did not read in location data:[%s]\n",
 		my_rank, procs, i+1,ret, strerror(errno));
-	return -1;
+	return ERROR;
       }
+      if (!(pt+pts_read)->observed_mass) (pt+pts_read)->observed_mass = .000000001;
       fprintf(log_file, "%lf %lf %lf %lf\n",
                         (pt+pts_read)->easting,
                         (pt+pts_read)->northing,
@@ -468,139 +432,79 @@ int get_points(FILE *in) {
     }
     i++;
   }
-
-
   fprintf(log_file,"EXIT[get_points]:[%d-of-%d]Read %d points.\n",
 	  my_rank, procs, pts_read);
   fflush(log_file);
-  return 0;
+  return FALSE;
 }
 
+/**************************************************************
+FUNCTION:  get_wind
+DESCRIPTION:  This function reads wind data into the
+FW WIND array. Each node stores all of the wind data. It is only called
+if FIXED_WIND = 1 (TRUE)
 
+INPUTS: (IN) FILE *in  (file handle from which to read)
+OUTPUTS: int -1=error, 0=no error
+***************************************************************/
+int get_wind(FILE *in) {
 
-
-/***************************************************************
-FUNCTION: variance
-DESCRIPTION: This function calculates the variance in the
-observed mass at each tephra location and sets the variance
-value to be used in calculating chi.
-INPUTS: none
-RETURN : none
-**************************************************************/
-double set_variance(void) {
-
-  double sum = 0.0;
-  int j;
-  /* because this varialbe is static, the declaration value is set only once */
-  static double variance=0.0;
-  double average=0.0;
-  double ep=0.0;
-
-#ifdef DEBUG
-  fprintf(log_file, "    ENTER[variance] num_pts=%d \n", num_pts);
-#endif
-
-if (variance) return variance;
-
-  for (j = 0; j < num_pts; j++)
-    sum += (p_all+j)->observed_mass;
-  average = sum/(double) num_pts;
-
-
-  for (j = 0; j < num_pts; j++) {
-    ep = (p_all+j)->observed_mass - average;
-    sum += ep*ep;
-
+  int i=0, levels=0, ret;
+  char line[MAX_LINE];
+  
+  fprintf(log_file,"ENTER[get_wind].\n");
+  
+  /* Count the number of wind levels */
+  while (fgets(line, MAX_LINE, in) != NULL)  {
+    if (line[0] == '#' || line[0] == '\n') continue;
+    levels++;
   }
-  variance = sum/((double)num_pts-1.0);
-  fprintf(stderr, "SUM=%f VARIANCE = %f\n", sum, variance);
-
-#ifdef DEBUG
-  fprintf(log_file,
-	  "    EXIT[variance]\tAVG=%f\tVAR=%f\tSTD DEV=%f\n",
-	  average, variance, sqrt(variance));
-#endif
-return variance;
+  rewind(in);
+           
+  FW = (WIND*)GC_MALLOC((size_t) levels*sizeof(WIND));
+  if (FW == NULL) {
+    fprintf(stderr, "Cannot malloc memory for wind columns:[%s]\n", strerror(errno));
+    return ERROR;
+  } 
+  
+  while (NULL != fgets(line, MAX_LINE, in)) { 
+  	if (line[0] == '#') continue;
+	else {
+		while (ret = sscanf(line, "%lf %lf %lf", 
+	            &FW[i].wind_height,
+	            &FW[i].windspeed,
+	            &FW[i].wind_direction), ret != 3) { 
+	     	if (ret == EOF && errno == EINTR) continue;
+	        fprintf(stderr, 
+	                "[line=%d,ret=%d] Did not read in 3 parameters:[%s]\n", 
+	                i+1,ret, strerror(errno));
+            return ERROR;
+         } /* END while */
+         
+	     fprintf(log_file, "%lf %lf %lf\n",
+                   FW[i].wind_height,
+                   FW[i].windspeed,
+                   FW[i].wind_direction);
+          FW[i].wind_direction *= DEG2RAD; /* change to radians */
+          i++;
+    }
+  } 
+	 /* Since the wind levels are the 'last param' the total
+	     number of params is determined when the number
+	     of wind levels is determined. When FIXED_WIND is
+	     TRUE, then the number of parameters and vertices is set here.
+	 */
+	INV_WIND_LEVELS = levels; 
+	 fprintf(log_file, "INV_WIND_LEVELS=%d\n", INV_WIND_LEVELS);   
+	/* NUM_OF_PARAMS = (int) (2 * levels); */
+   	NUM_OF_PARAMS = (LAST_PARAM - 2);
+   	fprintf(log_file, "NUM_OF_PARAMS=%d\n", NUM_OF_PARAMS);
+   	NUM_OF_VERTICES = NUM_OF_PARAMS + 1;      
+   
+  	fprintf(log_file, "\tRead %d wind levels.\n", levels);
+  	fprintf(log_file, "EXIT[get_wind].\n");	  	  
+  	return FALSE;
 }
-
-/********************************************************************************
-FUNCTION: chi_squared
-DESCRIPTION: The chi-squared test is used as the goodness-of-fit test.
-INPUTS: none
-OUTPUT:  double, the chi-squared value,
-         based on the calulated mass and the observed mass, at each location.
-********************************************************************************/
-double chi_squared(void) {
-
-  int i;
-  double chi=0.0, error;
-
-#ifdef DEBUG
- fprintf(log_file,"   ENTER[chi_squared] ...\n");
-#endif
- 
-  for (i=0; i < num_pts; i++) {
-#ifdef DEBUG
-    fprintf (stderr, "[%d]%f %f/ ", i, (p_all+i)->calculated_mass, (p_all+i)->observed_mass);
-#endif
-
-   /* error = log( (p_all+i)->calculated_mass ) - log( (p_all+i)->observed_mass);  */
-    error = (p_all+i)->calculated_mass - (p_all+i)->observed_mass; 
-    chi += (error*error)/(p_all+i)->calculated_mass;
-
-  }
-
-#ifdef DEBUG
-  fprintf(stderr, "\n");
-#endif
-
-#ifdef DEBUG
-  fprintf(log_file,"   EXIT[chi-squared] [ret=%f]\n\n", chi);
-#endif
-
-  return chi;
-}
-
-/********************************************************************************
-FUNCTION: rmse
-DESCRIPTION: The root mean squared error test is used as the goodness-of-fit test.
-INPUTS: none
-OUTPUT:  double, the goodness-of-fit value
-
-         Based on the difference between the calulated mass 
-         and the observed mass, at each location.
-********************************************************************************/
-double rmse(void) {
-
-  int i;
-  double rmse=0.0, error;
-
-#ifdef DEBUG
-  fprintf(log_file,"   ENTER[rmse] ...\n");
-#endif
-
-  for (i=0; i < num_pts; i++) {
-#ifdef DEBUG
-    fprintf (stderr, "[%d]%f %f/ ", i, (p_all+i)->calculated_mass, (p_all+i)->observed_mass);
-#endif
-
-    error = (p_all+i)->calculated_mass - (p_all+i)->observed_mass; 
-    rmse += (error*error);
-  }
-  rmse /= (num_pts);
-  rmse = sqrt(rmse);
-
-#ifdef DEBUG
-  fprintf(stderr, "\n");
-#endif
-
-#ifdef DEBUG
-  fprintf(log_file,"   EXIT[rmse] [ret=%f]\n\n", rmse);
-#endif
-
-  return rmse;
-}
-
 /*****************************************************************
 FUNCTION: minimizing_func
 DESCRIPTION: this is where the nodes assign new parameter values
@@ -629,7 +533,7 @@ double minimizing_func(double param[]) {
     }
   }
 
-  /* Every node assisgn the new parameters to their copy of the array of PRISM's */
+  /* Every node assisgn the new eruption parameters to their copy of the model*/
   assign_new_params( param );
   
 #ifdef DEBUG
@@ -637,9 +541,9 @@ double minimizing_func(double param[]) {
 #endif
 
   /* Every node can now calculate a tephra blanket for their subset of POINTs */
-  set_eruption_values(&e, W[0]);
+    set_eruption_values(&e, W);
   for (i=0; i < local_n; i++)
-    tephra_calc(&e, pt+i, W[0], &stats);
+    tephra_calc(&e, pt+i, W, &stats);
 #ifdef DEBUG
   fprintf(log_file, "Calculated mass...\n");
   for (i = 0;  i < local_n;  i++) {
@@ -670,7 +574,7 @@ double minimizing_func(double param[]) {
 			MPI_COMM_WORLD), !ret)	{
     if ( !my_rank ) {
       /* Only the master node calculates a new chi_value */
-      chi_calc = (*fit)();
+      chi_calc = (*fit)(log_file, num_pts, p_all);
       /* fprintf(stderr,"CHI=%f\n", chi_calc); */
     } else
       chi_calc = 0.0;
@@ -695,17 +599,17 @@ RETURN:  none
 *******************************************************************/
 void assign_new_params( double param[]) {
 
-  int parm, wind_level;
-	double wind_interval;
+  int parm, wind_level=0, j;
+	double wind_interval,wind_inversion_interval;
+	double height, direction, speed, level, dir0, ht0, sp0;
 	
 #ifdef DEBUG
-  fprintf(log_file, "ENTER[assign_new_params] num_param=%d\n",NUM_OF_PARAMS);
+  	fprintf(log_file, "ENTER[assign_new_params] num_param=%d\n",NUM_OF_PARAMS);
 #endif
 
     e.max_plume_elevation = param[MAX_COL_HT];
     e.alpha = param[ALPHAP];
     e.beta = param[BETAP];
-    e.plume_ratio  = param[COL_RATIO];
     e.diffusion_coefficient = param[DIFF_COEF];
     e.total_ash_mass = param[TOTAL_MASS];
     e.mean_phi = param[MED_PHI];
@@ -713,52 +617,122 @@ void assign_new_params( double param[]) {
     e.fall_time_threshold = param[FALLTIME_THRESH];
     e.eddy_constant = param[EDDY_COEF];
 
-
-
-    #ifdef DEBUG
-fprintf(log_file, "%.0f %g %g %.2f %.0f %g %g %g %.0f %.2f\n",
-     e.max_plume_elevation,
+	fprintf(log_file, "%.0f %g %g %.0f %g %g %g %.0f %.2f\n",
+    e.max_plume_elevation,
     e.alpha,
     e.beta,
-    e.plume_ratio,
     e.diffusion_coefficient,
     e.total_ash_mass,
-    e.median_phi,
+    e.mean_phi,
     e.sigma_phi,
     e.fall_time_threshold,
     e.eddy_constant);
-#endif
 
-wind_interval = (e.max_plume_elevation - e.vent_elevation)/(double)COL_STEPS;
+	/*wind_interval is the column_step interval (mapped to)*/
+	wind_interval = (e.max_plume_elevation - e.vent_elevation) / (double)(COL_STEPS);
+	/* wind_inversion_interval is the inversion wind interval (mapped from)*/
+	wind_inversion_interval = (e.max_plume_elevation - e.vent_elevation)/(double)INV_WIND_LEVELS;
 
-    for (wind_level=0, parm=WIND_SPEED; parm < NUM_OF_PARAMS; parm +=2, wind_level++) {
-        W[0][wind_level].wind_height = e.vent_elevation +((double)wind_level * wind_interval); 
-        W[0][wind_level].windspeed = param[parm];
-        W[0][wind_level].wind_direction = param[parm+1];
-        
-#ifdef DEBUG
-        if (!my_rank)   {
-            fprintf(log_file, "[\n%.0f %.0f %.0f]",
-            W[0][wind_level].wind_height, 
-            W[0][wind_level].windspeed,
-            W[0][wind_level].wind_direction/DEG2RAD);
-        }
-#endif
-
-    }
-#ifdef DEBUG
-fprintf(log_file, "\nEXIT[assign_new_params].\n");
-#endif
+	/* start at the vent */ 
+	level = e.vent_elevation; /* level of column wind levels */ 
+		
+	for (j=0; j <= COL_STEPS; j++) { 
+	  ht0 = 0.0;
+		dir0 = 0.0;
+		sp0 = 0.0; 
+		height = e.vent_elevation; /* level of assigner */ 
+		W[j].wind_height = 0; /* no wind level is assigned yet */
+		
+		if (FIXED_WIND) {
+			for (wind_level=0; wind_level < INV_WIND_LEVELS; wind_level++) {
+				height = FW[wind_level].wind_height;
+				speed = FW[wind_level].windspeed;
+				direction = FW[wind_level].wind_direction;
+				/* This is the case where the first height is equal to
+	         * or greater than the level that we are assigning.
+	         */
+        if (height >= level) {
+        	if(height == level) {
+        		W[j].wind_direction = direction;
+	          W[j].windspeed = speed;
+          } 
+          else { /* interpolate */
+	          W[j].wind_direction = 
+	          	((direction - dir0) * (level - ht0) / (height - ht0)) + dir0;
+            W[j].windspeed = 
+	          	((speed - sp0) * (level - ht0) / (height - ht0)) + sp0;
+	        }
+	        W[j].wind_height = level;
+	        break; /* ready to rescan the file for a match for the next level */
+	      }
+	      else { /* height is less than the level being assigned. */
+	      	/* Maintain the real wind values for possible interpolation 
+	        * at the next level.
+	        */
+	      	ht0 = height;
+	        dir0 = direction;
+	        sp0 = speed;
+	      }
+      } /* END for (wind_level */
+	  } /* END if FIXED_WIND */
+	  
+   	else { /* We are using inversion to determine the wind */
+   		for (wind_level=0, parm=WIND_SPEED;  parm < NUM_OF_PARAMS; parm +=2, wind_level++) { 
+   				/* height += wind_inversion_interval; */
+   				height = e.vent_elevation +((double)wind_level * wind_inversion_interval);
+   				speed = param[parm];
+        	direction = param[parm+1];
+        	    	
+        /* This is the case where the first height is equal to
+	       * or greater than the level that we are assigning.
+	       */
+        if (height >= level) {
+	      	if(height == level) {
+	        	W[j].wind_direction = direction;
+	          W[j].windspeed = speed;
+          } 
+          else { /* interpolate */
+	          W[j].wind_direction = 
+	          	((direction - dir0) * (level - ht0) / (height - ht0)) + dir0;
+            W[j].windspeed = 
+	            ((speed - sp0) * (level - ht0) / (height - ht0)) + sp0;
+	        }
+	        W[j].wind_height = level;
+	        break; /* ready to rescan the file for a match for the next level */
+	      }
+	      else { /* height is less than the level being assigned. */
+	        /* Maintain the real wind values for possible interpolation 
+	        * at the next level.
+	        */
+	        ht0 = height;
+	        dir0 = direction;
+	        sp0 = speed;
+	      }
+      } /* END for (wind_level */
+    } /* END else */
+    
+     /* If we finish scanning the inversion winds and all heights are below the level we are
+      * currently assigning, then just use the direction and speed
+	    * at the upper-most height.
+	    */
+	  if (!W[j].wind_height) {
+	   	W[j].wind_height = level;
+	    W[j].windspeed = sp0;
+	    W[j].wind_direction = dir0;
+	  }
+	  fprintf(log_file, "[%d] %.0f %.2f %.2f\n", j, W[j].wind_height, W[j].windspeed, W[j].wind_direction);
+	  level += wind_interval;   
+		/* Go to the next column height */  	
+	} /* END for j=0 */
 }
-
+/******************************/
 void set_LOG(FILE *log  ) {
   log_file = log;
 }
-
+/*****************************/
 void close_logfile(void) {
   fclose(log_file);
 }
-
 /****************************************************************************
 FUNCTION: init_optimal_params
 This function initially sets values for all sets of parameters. The values
@@ -809,18 +783,6 @@ fprintf(stderr, "  param[%d][%d]=%f ", vert, ALPHAP, op[vert][ALPHAP]);
             ((double)(HI_PARAM(BETAP) - LO_PARAM(BETAP)) * (double)rand()/(RAND_MAX+1.0));
 #ifdef DEBUG2
 fprintf(stderr, "  param[%d][%d]=%f ", vert, BETAP, op[vert][BETAP]);
-#endif
-
-      /* The next parameter is the plume_ratio.
-	 For each set of eruption parameters randomly select an initial beta value
-	 within the LO_PARAM - HI_PARAM range (no units).
-      */
-      op[vert][COL_RATIO] =
-	(double)LO_PARAM(COL_RATIO) +
-	((double)(HI_PARAM(COL_RATIO)-LO_PARAM(COL_RATIO)) * (double)rand()/(RAND_MAX+1.0));
-#ifdef DEBUG2
-      fprintf(stderr, "  param[%d][%d]=%f ",
-			      vert, COL_RATIO, op[vert][COL_RATIO]);
 #endif
 
       /* The next parameter is the diffusion coeffient.
@@ -895,33 +857,18 @@ fprintf(stderr, "  param[%d][%d]=%f ", vert, BETAP, op[vert][BETAP]);
 
       /* The remaining parameters are the wind speed and wind direction for each wind level.
 	 Each eruption set will use these wind parameters.
-	 initally gets a random value within the LO_PARAM - HI_PARAM
-	 range.  This value must not be greater than the value selected for the
-	 surface-to-bottom value for the current parameter set.
+	 I  FIXED_WIND = 0, then initally these values get a random value within the LO_PARAM - HI_PARAM
+	 range.  If FIXED_WIND = 1 then these values are set from the FW array (fixed wind array);
       */
-      for (parm = WIND_SPEED; parm < NUM_OF_PARAMS; parm += 2) { /* for loop */
-				 /*rand()/(RAND_MAX+1.0);*/
-        op[vert][parm] =LO_PARAM(WIND_SPEED) + ((HI_PARAM(WIND_SPEED) - LO_PARAM(WIND_SPEED)) * rand()/(RAND_MAX+1.0));
-
-/* op[vert][parm] = LO_PARAM(WIND_DIRECTION); */
-/*	op[vert][parm] =
-	  LO_PARAM(WIND_SPEED) + (HI_PARAM(WIND_SPEED) - LO_PARAM(WIND_SPEED)) * rand()/(RAND_MAX+1.0));
-*/
-				op[vert][parm+1] =
+      if (!FIXED_WIND) {
+      	for (parm = WIND_SPEED; parm < NUM_OF_PARAMS; parm += 2) { /* for loop */
+        	op[vert][parm] =
+        	LO_PARAM(WIND_SPEED) + ((HI_PARAM(WIND_SPEED) - LO_PARAM(WIND_SPEED)) * rand()/(RAND_MAX+1.0));
+			op[vert][parm+1] =
   			LO_PARAM(WIND_DIRECTION) + ((HI_PARAM(WIND_DIRECTION) - LO_PARAM(WIND_DIRECTION)) * rand()/(RAND_MAX+1.0));
-
-#ifdef DEBUG2
-	fprintf(log_file, "  param[%d][%d]=%f param[%d][%d]=%f",
-		vert, parm, op[vert][parm], vert, parm+1, op[vert][parm+1]);
-#endif
-      } /* END for loop */
-#ifdef DEBUG2
-    fprintf(log_file, "\n");
-#endif
-/*fprintf(log_file, "\n"); */
+      	} /* END for loop */
+      } /* END if !FIXED_WIND */
     } /* END for loop */
-
-
   /*
     for ( param=0; param < NUM_OF_PARAMS; param++)
     printf("%f ", optimal_param[vert][param]);
@@ -961,10 +908,8 @@ void printout_points(void) {
     fprintf(out, "[%g->%g) ",
 	   e.min_phi + bin_width*bin, e.min_phi + bin_width*(bin + 1));
   fprintf(out, "(percent)\n");
-  
   fprintf(stderr, "PART_STEPS=%d bin_width=%g\n", PART_STEPS, bin_width);
 
-  
   for (i=0; i < num_pts; i++) {
     fprintf(out, "%.0f %.0f %.0f %g ",
 	    (p_all+i)->easting,
@@ -985,13 +930,13 @@ void printout_points(void) {
 FUNCTION:   printout_model
 DESCRIPTION:  This function prints out the prism locations and each prism's
 set of parameters to the file "prisms.out".
-INPUTS:  none
+INPUTS:  The array of inversion parameters, param[]
 OUTPUTS:  none
  ************************************************************************/
-void printout_model(void) {
+void printout_model(double param[]) {
 
-  int i, j,  WIND_DAYS = 1;
-  double wind_levels;
+	int j = 0, parm;
+  double height, speed, direction, wind_inversion_interval;
   FILE *out1, *out2;
 
   out1 = fopen(GRAIN_SZ_MODEL, "w");
@@ -1023,7 +968,6 @@ Fall Time Threshold: %.0f\n",
         e.max_phi,
         e.mean_phi,
         e.sigma_phi,
-        /* e.plume_ratio, */
         e.alpha,
         e.beta,
         e.diffusion_coefficient,
@@ -1034,23 +978,34 @@ Fall Time Threshold: %.0f\n",
         e.fall_time_threshold);
     (void) fclose(out1);
 
- 
-  wind_levels = COL_STEPS + 1;
   out2 = fopen(WIND_MODEL, "w");
   if (out2 == NULL) {
     fprintf(stderr,
 	    "Cannot output model to file:[%s]. Printing to STDOUT.\n", strerror(errno));
     out2 = stdout;
   }
+  
   fprintf(out2, "#HEIGHT\tSPEED\tDIRECTION\n");
-  for (i=0; i < WIND_DAYS; i++)
-    for (j=0; j < wind_levels; j++) {
-            fprintf(out2, "%.1f %.1f %.1f\n",
-	      W[i][j].wind_height,
-	      W[i][j].windspeed,
-	      W[i][j].wind_direction/DEG2RAD);
-	      
-	  }
+  if (FIXED_WIND)  {
+	for (j=0; j < INV_WIND_LEVELS; j++) { 
+		height = FW[j].wind_height;
+		direction = FW[j].wind_direction/DEG2RAD;
+		speed = FW[j].windspeed;
+		fprintf(out2, "%.0f %.2f %.2f\n", height, speed, direction);
+		fprintf(stderr, "[%d] %.0f %.2f %.2f\n", j, height, speed, direction);
+	}
+ }
+ else {
+ 	height = e.vent_elevation;
+ 	wind_inversion_interval = (e.max_plume_elevation - e.vent_elevation)/(double)INV_WIND_LEVELS;
+ 	for (parm = WIND_SPEED; parm < NUM_OF_PARAMS; parm += 2) { /* for loop */
+   		speed = param[parm];
+        direction = param[parm+1]/DEG2RAD;
+        fprintf(out2, "%.0f %.2f %.2f\n", height, speed, direction);
+		fprintf(stderr, "[%d] %.0f %.2f %.2f\n", j, height, speed, direction);
+		height += wind_inversion_interval;
+ 	}
+  }
   (void) fclose(out2);
 
 }
@@ -1109,7 +1064,6 @@ Wind Direction: %.0f  %.0f (+/- degrees from N)\n",
 	  asctime(localtime(&mytime)),
 	  rmse,
     e.max_plume_elevation,
-	 /* e.plume_ratio, */
 	  e.alpha,
 	  e.beta,
 	  e.diffusion_coefficient,
@@ -1127,7 +1081,6 @@ Wind Direction: %.0f  %.0f (+/- degrees from N)\n",
 	  LO_PARAM(MAX_COL_HT), HI_PARAM(MAX_COL_HT),
 	  LO_PARAM(ALPHAP), HI_PARAM(ALPHAP),
 	  LO_PARAM(BETAP), HI_PARAM(BETAP),
-	  /*LO_PARAM(COL_RATIO), HI_PARAM(COL_RATIO), */
 	  LO_PARAM(DIFF_COEF), HI_PARAM(DIFF_COEF),
 	  LO_PARAM(EDDY_COEF), HI_PARAM(EDDY_COEF),
 	  LO_PARAM(TOTAL_MASS), HI_PARAM(TOTAL_MASS),
@@ -1144,7 +1097,7 @@ Wind Direction: %.0f  %.0f (+/- degrees from N)\n",
 void print_for_stats(double chi) {
 
   FILE *out;
-  double rmse;
+  /*double rmse; */
 
   out = fopen("plume.dat", "w");
   if (out == NULL) {
@@ -1153,10 +1106,7 @@ void print_for_stats(double chi) {
 	    strerror(errno));
     out = stdout;
   }
-  rmse = sqrt(chi);
-  /* ME | Max Column Height | Total Mass Ejected | Median Size | Std. Dev. in Distribution | Column Ratio */
-  /*fprintf(out, "%.2f %.0f %g %.2f %.2f %.2f\n",
-	  rmse, e.max_plume_elevation, e.total_ash_mass, e.median_phi, e.sigma_phi, e.plume_ratio);*/
+  /*rmse = sqrt(chi);*/
 	  fprintf (out, "%.0f %.0f  %d %g %g", e.max_plume_elevation, e.vent_elevation, (int) COL_STEPS, e.alpha, e.beta);
 
   if (out != stdout) fclose(out);

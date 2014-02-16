@@ -2,6 +2,7 @@
 /* Define the physical constants used in the new_tephra.c code */
 
 #define LOG_FILE "node_"
+#define ERROR -1
 /* #define DEBUG 1 */
 /* #define _PRINT 1 */
 #define R 0.61803399
@@ -36,7 +37,10 @@ extern int NUM_OF_VERTICES;
 extern double _LO[];
 extern double _HI[];
 
-/* enum{DISTR_1, DISTR_2, DISTR_3}; */
+/* This variable determines whether to perform the inversion
+    for wind speed and direction or to use a supplied wind
+    file */
+extern int FIXED_WIND;
 
 /* These are now defined in config file. 
 extern int PLUME_MODEL; */
@@ -78,12 +82,11 @@ extern int WIND_DAYS;
    8) eddy constant 
    9 to ..) wind speed [0 to 50 m/sec]
    .. to last param) wind direction [0 to 360 degrees]
-
-enum {NEG_8, NEG_7, NEG_6, NEG_5, NEG_4, NEG_3, NEG_2, NEG_1, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN};
 */
+enum{FALSE, TRUE};
 enum{DISTR_1, DISTR_2};
-enum {CHI2, RMSE};
-enum {MAX_COL_HT, ALPHAP, BETAP, COL_RATIO, DIFF_COEF, TOTAL_MASS, MED_PHI, STD_DEV_PHI, FALLTIME_THRESH, EDDY_COEF, WIND_SPEED, WIND_DIRECTION, LAST_PARAM}; 
+enum {CHI2, RMSE, LOG_TEST};
+enum {MAX_COL_HT, ALPHAP, BETAP, DIFF_COEF, TOTAL_MASS, MED_PHI, STD_DEV_PHI, FALLTIME_THRESH, EDDY_COEF, WIND_SPEED, WIND_DIRECTION, LAST_PARAM}; 
 
 
 

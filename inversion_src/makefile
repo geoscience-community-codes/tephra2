@@ -11,11 +11,12 @@ endif
 all:  	tephra2012_inversion
 	mv tephra2012_inversion ..
 
-tephra2012_inversion:		master.o slave.o ameoba.o tephra_inversion.o minimizing_func.o tephra2_calc.o
+tephra2012_inversion:		master.o slave.o ameoba.o tephra_inversion.o minimizing_func.o tephra2_calc.o fit_tests.o
 		$(CC)  -O3 -Wall -pthread -o tephra2012_inversion \
 		master.o\
 		slave.o\
 		ameoba.o\
+		fit_tests.o -lm\
 		minimizing_func.o -lm\
 		tephra_inversion.o\
 		tephra2_calc.o $(LIB)/gc.a -ldl
@@ -29,6 +30,9 @@ slave.o:		slave.c ../common_src/parameters.h makefile
 ameoba.o:		ameoba.c ../common_src/parameters.h makefile
 			$(CC) -Wall -idirafter ../include -c ameoba.c
 
+fit_tests.o:		fit_tests.c ../common_src/common_structures.h makefile
+			$(CC) -Wall -idirafter ../include -c fit_tests.c
+			
 minimizing_func.o:	minimizing_func.c ../common_src/common_structures.h makefile 
 			$(CC) -Wall -idirafter ../include -c minimizing_func.c
 
@@ -39,4 +43,4 @@ tephra_inversion.o:	tephra_inversion.c ../common_src/common_structures.h ../comm
 			$(CC) -Wall -O3 -idirafter ../include -c tephra_inversion.c
 
 clean:
-	rm *.o tephra2012_inversion
+	rm *.o

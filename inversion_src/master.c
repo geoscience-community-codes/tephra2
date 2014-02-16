@@ -83,7 +83,7 @@ fprintf(log_file, "ENTER[master]\n");
       param_val[param] =  optimal_param[0][param];
 
     assign_new_params( param_val );
-    printout_model();
+    printout_model(param_val);
 #ifdef DEBUG
     fprintf(log_file, "EXIT[master]\n");
 #endif

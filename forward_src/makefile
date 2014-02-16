@@ -21,4 +21,4 @@ tephra2_calc.o:		../common_src/tephra2_calc.c ../common_src/common_structures.h 
 		$(CC) -Wall -O3 -idirafter ../include -c ../common_src/tephra2_calc.c
 
 clean:
-		rm -fv *.o ../tephra2-2012
+		rm -fv *.o
