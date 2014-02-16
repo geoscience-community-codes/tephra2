@@ -1,4 +1,5 @@
-CC=/usr/bin/mpicc
+CC=`which mpicc`
+#CC=/usr/bin/mpicc
 LBITS := $(shell getconf LONG_BIT)
 ifeq ($(LBITS),64)
    # do 64 bit stuff here, like set some CFLAGS
