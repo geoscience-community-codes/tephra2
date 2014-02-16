@@ -52,6 +52,7 @@ void test_bounds(int param, double *try, double bound) {
 #ifdef DEBUG
   if (param == MAX_COL_HT) fprintf(log_file, "\n");
   fprintf(log_file, "Param=%d ", param);
+#endif
 
   if (!FIXED_WIND) { 
   	if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
@@ -63,9 +64,10 @@ void test_bounds(int param, double *try, double bound) {
   		else if (*try > HI_PARAM(param)) *try = HI_PARAM(param);
   	}
   }
-  #endif
- if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
+
+ /*if (*try < LO_PARAM(param)) *try = LO_PARAM(param);
  else if (*try > HI_PARAM(param)) *try = HI_PARAM(param); 
+*/
 }
 /****************************************************************
 FUNCTION: init_globals
@@ -617,7 +619,7 @@ void assign_new_params( double param[]) {
     e.fall_time_threshold = param[FALLTIME_THRESH];
     e.eddy_constant = param[EDDY_COEF];
 
-	fprintf(log_file, "%.0f %g %g %.0f %g %g %g %.0f %.2f\n",
+/*	fprintf(log_file, "%.0f %g %g %.0f %g %g %g %.0f %.2f\n",
     e.max_plume_elevation,
     e.alpha,
     e.beta,
@@ -627,7 +629,7 @@ void assign_new_params( double param[]) {
     e.sigma_phi,
     e.fall_time_threshold,
     e.eddy_constant);
-
+*/
 	/*wind_interval is the column_step interval (mapped to)*/
 	wind_interval = (e.max_plume_elevation - e.vent_elevation) / (double)(COL_STEPS);
 	/* wind_inversion_interval is the inversion wind interval (mapped from)*/
@@ -720,7 +722,8 @@ void assign_new_params( double param[]) {
 	    W[j].windspeed = sp0;
 	    W[j].wind_direction = dir0;
 	  }
-	  fprintf(log_file, "[%d] %.0f %.2f %.2f\n", j, W[j].wind_height, W[j].windspeed, W[j].wind_direction);
+/*	  fprintf(log_file, "[%d] %.0f %.2f %.2f\n", j, W[j].wind_height, W[j].windspeed, W[j].wind_direction);
+*/
 	  level += wind_interval;   
 		/* Go to the next column height */  	
 	} /* END for j=0 */
