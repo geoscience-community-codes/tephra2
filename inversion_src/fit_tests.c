@@ -71,7 +71,7 @@ double chi_squared(FILE *log_file, int num_pts, POINT *p_all) {
 
    /* error = log( (p_all+i)->calculated_mass ) - log( (p_all+i)->observed_mass);  */
     error = (p_all+i)->calculated_mass - (p_all+i)->observed_mass; 
-    chi += (error*error)/(p_all+i)->calculated_mass;
+    chi += (error*error)/(p_all+i)->observed_mass;
 
   }
 
@@ -137,7 +137,7 @@ OUTPUT:  double, the fit value,
 double log_test(FILE *log_file, int num_pts, POINT *p_all) {
 
 	int i;
-  double fit = 0.0, ratio;
+  double fit = 0.0, ratio, log_ratio;
 
 #ifdef DEBUG
   fprintf(log_file,"   ENTER[log_test] ...\n");
@@ -148,8 +148,10 @@ double log_test(FILE *log_file, int num_pts, POINT *p_all) {
 #ifdef DEBUG
     fprintf (stderr, "[%d]%f %f/ ", i, (p_all+i)->calculated_mass, (p_all+i)->observed_mass);
 #endif 
-		ratio = log10((p_all+i)->calculated_mass / (p_all+i)->observed_mass);
-		fit += (ratio * ratio);
+		ratio = (p_all+i)->calculated_mass / (p_all+i)->observed_mass;
+		if (ratio <=0) log_ratio = 0;
+		else log_ratio = log10(ratio);
+		fit += (log_ratio * log_ratio);
 	}
 	
 #ifdef DEBUG
