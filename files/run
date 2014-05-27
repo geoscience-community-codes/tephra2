@@ -1,34 +1,65 @@
-##########################################
-# Set these three input parameters before running an inversion
-# This is the data, easting northing elevation kg/m^2
-INPUT=colima_phi0.utm
-# This is the inversion configuration file
-CONF=colima.conf
-# This is the wind file to be used for the inversion if a FIXED_WIND is chosen
-WIND=../Jan2013/wind3
-##########################################
+#####################################
+# This script runs tephra2-inversion
+# and additional plotting scripts
+# to visualize the results. Any line
+# can be commented out with a # sign.
+#####################################
+#Path to the inversion code
+EXE=/home/CONNOR/ljc/2014/tephra2-test/tephra2012_inversion
+echo $EXE
+#
+INPUT=cordon.in
+echo $INPUT
+#
+#Selected wind field
+WIND=
+#
+echo $WIND
+#
+#Inversion configuration file
+ICONF=cordon.conf
+echo $ICONF
+#
+#Grid file for final forward model
+GRID=
+echo $GRID
+###############################
 date
-## Do the inversion
-mpirun n4-7 ../src_2012.12.18/tephra2012_inversion $CONF $INPUT $WIND
-##
+# Do the inversion
+RUN="mpirun -np 4 -hostfile machines $EXE $ICONF $INPUT"
+echo $RUN
+$RUN
 date
-## Generate a plot of the plume model (beta function)
-perl ../scripts/plume.gmt.pl plume.dat plume.eps
-##
-## Plot equiline plot (calculated vs. observed)
-perl ../scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps
-##
-## Write out a configuration file for tephra2
-perl ../scripts/write_conf.pl parameters.README tephra2.conf 75 75
-##
-## Generate a wind diagram
-perl ../scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps
-##
-## Run the tephra2 forward model
-../src_2012.12.18/tephra2-2012 tephra2.conf ../colima.data.grid wind_levels.out >tephra2.out
-##
-## Parse the output data and create a plotting file
-perl ../scripts/parse_tephra.out.pl tephra2.out > tephra2.out.xyz
-##
-## Plot a contour map of the tephra deposit from tephra2 model
-perl ../scripts/plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps
+#
+# Generate a plot of the plume model (beta function)
+RUN="perl ../tephra2/scripts/plume.gmt.pl plume.dat plume.eps"
+echo $RUN
+$RUN
+#
+# Plot equiline plot (calculated vs. observed)
+RUN="perl ../tephra2/scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps"
+echo $RUN
+$RUN
+#
+# Write out a configuration file for tephra2
+#perl ../tephra2/scripts/write_conf.pl parameters.README tephra2.conf 400 400 nrmse
+#
+# Generate a wind diagram
+RUN="perl ../tephra2/scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps"
+echo $RUN
+$RUN
+#
+# Run the tephra2 forward model
+RUN="/home/ljc/src/tephra2_inversion/2012.12.18/tephra2-2012 tephra2.conf $GRID wind_levels.out >tephra2.out"
+echo $RUN
+$RUN
+#
+# Parse the output data and create a plotting file
+RUN="perl ../parse_tephra.out.pl tephra2.out > tephra2.out.xyz"
+echo $RUN
+$RUN
+#
+# Plot a contour map of the tephra deposit from tephra2 model
+RUN="perl ../plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps"
+echp $RUN
+$RUN

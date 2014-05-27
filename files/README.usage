@@ -1,0 +1,4 @@
+USAGE: nohup sh run > nohup.out &
+
+USE: cd tail -f nohup.out
+to view stderr and stdout as it is being saved to this file.
