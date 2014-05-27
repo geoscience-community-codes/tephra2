@@ -1020,11 +1020,10 @@ parameters used and modified during the modeling process.
 INPUTS:  double chi  The best chi value.
 OUTPUTS:  none
  ************************************************************************/
-void printout_parameters(double chi) {
+void printout_parameters(double fit) {
 
   FILE *out;
   time_t mytime;
-  double rmse;
 
   out = fopen(README, "w");
   if (out == NULL) {
@@ -1034,7 +1033,6 @@ void printout_parameters(double chi) {
     out = stdout;
   }
   mytime = time(&mytime);
-  rmse = sqrt(chi);
   fprintf(out, "%s\n\
 FIT = %.2f\n\
 Modeled Values:\n\tMax Column Height: %.0f (m)\n\t\
@@ -1065,7 +1063,7 @@ Fall Time Threshold: %.0f  %.0f (s)\n\t\
 Wind Speed: %.1f  %.1f (m/s)\n\t\
 Wind Direction: %.0f  %.0f (+/- degrees from N)\n",
 	  asctime(localtime(&mytime)),
-	  rmse,
+	  fit,
     e.max_plume_elevation,
 	  e.alpha,
 	  e.beta,
