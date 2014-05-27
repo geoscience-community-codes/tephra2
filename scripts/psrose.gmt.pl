@@ -38,7 +38,7 @@ printf STDERR "%d %.1f %d\n", $max_ht, $max_speed, $max_dir;
 $max_dir += 5;
 $min_dir -= 5;
 #system "psrose $in -Y2i -R0/30/0/360/0/30 -G0 -M0.04i/0.12i/0.1i/255/0/0 -W1p/50 -Ba1g1:'Wind Speed (m/sec)':/g25:'':/:.'Wind Direction (wind blowing toward)': -S3 -C -V > $out";
-system "makecpt -C../GMT_panoply.cpt -T0/$max_ht/5 -I > cpt";
+system "makecpt -Cpanoply -T0/$max_ht/5 -I > cpt";
 system "psxy $in -Y2i -R$min_dir/$max_dir/0/$max_speed -Sc.1c -SV -N -Jpa.2/.2 -Ba30g30/f1g5 -Gred -Ccpt  -V -K -P > $out";
 system "psscale -D12/6/5/.2c -Ccpt -Li -B:'':/:'Wind Levels (kmasl)': -V -O >> $out";
 system "ps2raster $out -A -Tg -V";
