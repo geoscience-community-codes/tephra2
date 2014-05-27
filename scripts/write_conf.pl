@@ -1,6 +1,5 @@
 my $c_steps = $ARGV[2];
 my $p_steps = $ARGV[3];
-my $nrmse = $ARGV[4];
 
 my $Col_Ht;
 my $Alpha;
@@ -13,6 +12,8 @@ my $Median_phi;
 my $Std_phi;
 my $Total_mass;
 
+open(FIT, "<$ARGV[4]") || die ("Cannot open $ARGV[4]:$!");
+($nrmse) = split("\n"); 
 
 open(README, "<$ARGV[0]") || die("Cannot open $ARGV[0]:$!");
     
@@ -84,9 +85,15 @@ printf RESULTS "%.2f %.0f %.1f %.1f %.0f %.0f %.2f %.2f %.2g\n", $nrmse, $Col_Ht
 close RESULTS;
 
 # Read old configuration file and update, writing out a new file
-open(CONF, "<$ARGV[1]") || die("Cannot open $ARGV[1]:$!");
-@lines = <CONF>;
-close(CONF);
+$ret = open(CONF, "<$ARGV[1]");
+if ($ret) {
+	@lines = <CONF>;
+	close(CONF);
+}
+else {
+	print stderr "No tephra2 configuration file to update!\n";
+	exit;
+}
 
 open(CONF, ">$ARGV[1]") || die("Cannot open $ARGV[1]:$!");
 foreach $line (@lines) {
