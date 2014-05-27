@@ -102,5 +102,6 @@ system "psbasemap --HEADER_FONT_SIZE=14 -JX -R -B:'':/:'':/:.'$title':wnes -K -O
 system "psxy $points -JX -N -Sc.15i -G0 -R -O >> $out";
 
 system "ps2raster $out -A -Tg";
-system "perl ../write_conf.pl parameters.README tephra2.conf 75 75 $rmse";
+system "echo $rmse > nrmse";
+#system "perl write_conf.pl parameters.README tephra2.conf 400 400 $rmse";
 
