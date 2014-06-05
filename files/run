@@ -4,20 +4,20 @@
 # to visualize the results. Any line
 # can be commented out with a # sign.
 #####################################
-#Path to the inversion code
-EXE=/home/CONNOR/ljc/2014/tephra2-test/tephra2012_inversion
+#Path to the inversion code (example shown)
+EXE=/home/bin/tephra2012_inversion
 echo $EXE
 #
-INPUT=cordon.in
+INPUT=
 echo $INPUT
 #
-#Selected wind field
+#Selected wind field 
 WIND=
 #
 echo $WIND
 #
 #Inversion configuration file
-ICONF=cordon.conf
+ICONF=
 echo $ICONF
 #
 #Grid file for final forward model
@@ -25,7 +25,7 @@ GRID=
 echo $GRID
 ###############################
 date
-# Do the inversion
+# Do the inversion (example shown)
 RUN="mpirun -np 4 -hostfile machines $EXE $ICONF $INPUT"
 echo $RUN
 $RUN
@@ -61,5 +61,5 @@ $RUN
 #
 # Plot a contour map of the tephra deposit from tephra2 model
 RUN="perl ../plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps"
-echp $RUN
+echo $RUN
 $RUN
