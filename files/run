@@ -5,61 +5,68 @@
 # can be commented out with a # sign.
 #####################################
 #Path to the inversion code (example shown)
-EXE=/home/bin/tephra2012_inversion
-echo $EXE
+EXEI=../tephra2012_inversion
+echo $EXEI
 #
-INPUT=
+INPUT=colima_38wgs84z13.xyz
 echo $INPUT
 #
 #Selected wind field 
-WIND=
+WIND=../Jan2013/wind3
 #
 echo $WIND
 #
 #Inversion configuration file
-ICONF=
+ICONF=colima38.conf
 echo $ICONF
 #
+#Path to forward model
+EXE=../tephra2-2012 
+echo $EXE
+#
 #Grid file for final forward model
-GRID=
+GRID=../colima.data.grid
 echo $GRID
+#
+#Vent location
+VENT=../colima_vent.xy
 ###############################
 date
 # Do the inversion (example shown)
-RUN="mpirun -np 4 -hostfile machines $EXE $ICONF $INPUT"
+RUN="mpirun -np 6 -hostfile ../machines $EXEI $ICONF $INPUT $WIND"
 echo $RUN
 $RUN
 date
 #
 # Generate a plot of the plume model (beta function)
-RUN="perl ../tephra2/scripts/plume.gmt.pl plume.dat plume.eps"
+RUN="perl ../plotting_scripts/plume.gmt.pl plume.dat plume.eps"
 echo $RUN
 $RUN
 #
 # Plot equiline plot (calculated vs. observed)
-RUN="perl ../tephra2/scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps"
+RUN="perl ../plotting_scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps"
 echo $RUN
 $RUN
 #
 # Write out a configuration file for tephra2
-#perl ../tephra2/scripts/write_conf.pl parameters.README tephra2.conf 400 400 nrmse
+RUN="perl ../plotting_scripts/write_conf.pl parameters.README tephra2.conf 200 100 nrmse"
+echo $RUN
+$RUN
 #
 # Generate a wind diagram
-RUN="perl ../tephra2/scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps"
+RUN="perl ../plotting_scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps"
 echo $RUN
 $RUN
 #
 # Run the tephra2 forward model
-RUN="/home/ljc/src/tephra2_inversion/2012.12.18/tephra2-2012 tephra2.conf $GRID wind_levels.out >tephra2.out"
-echo $RUN
-$RUN
+echo "$EXE tephra2.conf $GRID wind_levels.out >tephra2.out"
+`$EXE tephra2.conf $GRID wind_levels.out >tephra2.out`
 #
 # Parse the output data and create a plotting file
-RUN="perl ../parse_tephra.out.pl tephra2.out > tephra2.out.xyz"
-echo $RUN
-$RUN
+echo "perl ../plotting_scripts/parse_tephra.out.pl tephra2.out >tephra2.out.xyz"
+`perl ../plotting_scripts/parse_tephra.out.pl tephra2.out >tephra2.out.xyz`
 #
 # Plot a contour map of the tephra deposit from tephra2 model
-RUN="perl ../plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps"
+RUN="perl ../plotting_scripts/plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps $VENT"
 echo $RUN
 $RUN

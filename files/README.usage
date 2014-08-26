@@ -1,3 +1,4 @@
+Place the run script in a directory with your data files and the two configuration files: tephra2.conf and tephra2-inversion.conf
 USAGE: nohup sh run > nohup.out &
 
 USE: cd tail -f nohup.out
