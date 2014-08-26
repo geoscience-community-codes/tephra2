@@ -31,6 +31,8 @@ while (<DATA_IN>) {
   ($e2, $n2, $el2, $data_out[$ct]) = split(" ", $line2);
   if ($data_in[$ct] < $min) {$min = $data_in[$ct];}
   if ($data_in[$ct] > $max) {$max = $data_in[$ct];}
+  if ($data_out[$ct] < $min) {$min = $data_out[$ct];}
+  if ($data_out[$ct] > $max) {$max = $data_out[$ct];}
   $s_data_in = sqrt($data_in[$ct]);
   $s_data_out = sqrt($data_out[$ct]);
   printf DATA "%.3f %.3f 0\n", $s_data_in, $s_data_out;
@@ -71,10 +73,11 @@ while (<DATA_IN>) {
   $ct++;
 }
 
-$pmin = sqrt($min)-1;
-$pmax = sqrt($max)+1;
+$pmin = sqrt($min);
+$pmax = sqrt($max);
+printf stderr "Min=$pmin  MAX=$pmax\n";
 system "psbasemap --HEADER_FONT_SIZE=14 -JX6i -R$pmin/$pmax/$pmin/$pmax -Ba2g2:'sqrt(Observed [kg m\@+-2\@+])':/a2g2:'sqrt(Calculated [kg m\@+-2\@+)]':/:.'':WS -K -P > $out ";
-system "psxy -JX -R -W2p/255/0/0 -V -O -K <<eof>> $out
+system "psxy -JX -R -W2p/255/0/0 -O -K <<eof>> $out
 $pmin $pmin
 $pmax $pmax
 eof
@@ -99,7 +102,7 @@ $rmse /= ($max - $min);
 $title = sprintf "NRMSE = %.2f", $rmse;
 printf "$title\n";
 system "psbasemap --HEADER_FONT_SIZE=14 -JX -R -B:'':/:'':/:.'$title':wnes -K -O >> $out ";
-system "psxy $points -JX -N -Sc.15i -G0 -R -O >> $out";
+system "psxy $points -JX -N -Sc.18i -G0 -R -O >> $out";
 
 system "ps2raster $out -A -Tg";
 system "echo $rmse > nrmse";
