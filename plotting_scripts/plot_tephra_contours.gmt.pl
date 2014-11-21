@@ -39,11 +39,12 @@ $west = 600000;
 $east = 700000;
 $south = 2140000;
 $north = 2280000;
-system "surface --D_FORMAT=%g $in -Gtephra.grd -I$cellsize -R$west/$east/$south/$north";
-system "psbasemap --BASEMAP_TYPE=plain --ANNOT_FONT_PRIMARY=2 --ANNOT_FONT_SIZE=12 --D_FORMAT=%.0f -Y2i -X1i -Jx1:600000 -R -Ba20000:'':/a20000:'':/:.'':WSen -P -K > $out";
+system "surface $in -Gtephra.grd -I$cellsize -R$west/$east/$south/$north -V";
+system "psbasemap --BASEMAP_TYPE=plain --ANNOT_FONT_PRIMARY=2 --ANNOT_FONT_SIZE=10 --D_FORMAT=%.0f -Y2i -X1i -Jx1:600000 -R -Ba20000:'':/a20000:'':/:.'':WSen -P -K > $out";
 
 system "psxy $samples -Jx -R -Sc8p  -Gred -Wthinnest,0 -O -K >> $out";
-system "grdcontour tephra.grd -C$contour -A10+f0+s8+kblack -Wthinnest,0 -Gn2 -Jx -R -O -K >> $out";
+#system "grdcontour tephra.grd -C$contour -A10+f0+s8+kblack -Wthinnest,0 -Gn2 -Jx -R -O -K >> $out";
+system "grdcontour tephra.grd -C0.25 -A2+f6+r6+s6 -Q25 -Wa0.75p,0 -Wc.25p,150 -Gn1 -Jx -R -O -K -V >> $out";
 system "psxy $vent -Jx -R -St20p  -Gyellow -Wthinnest,0 -O >> $out";
 system "ps2raster $out -A -Tg";
 system "rm $contour";
