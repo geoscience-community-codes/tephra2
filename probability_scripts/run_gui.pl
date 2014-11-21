@@ -3,7 +3,6 @@
 use strict;
 use Tk;
 use Tk::PNG;
-use Image::Resize;
 #use Image::Imlib2;
 use Tk::MsgBox;
 use Tk::Pane;
@@ -12,10 +11,13 @@ use Tk::PathEntry;
 #use Tk::BrowseEntry;
 use Tk::LogScale;
 use Data::Dumper;
-use Cwd;
+use File::Basename qw(dirname);
+use Cwd qw(cwd abs_path);
+use lib dirname(dirname abs_path $0) . '/lib';
+use Image::Resize;
 
 
-our $Tephra2_exe = "./tephra2-2012";
+our $Tephra2_exe = "../tephra2-2012";
 our $run_line = "perl survivor_function.pl $Tephra2_exe ";
 #our $num_runs = 1000;
 #our $wind_dir = "wind_db";
