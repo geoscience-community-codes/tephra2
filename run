@@ -1,0 +1,86 @@
+#####################################
+# This script runs tephra2-inversion
+# and additional plotting scripts
+# to visualize the results. Any line
+# can be commented out with a # sign.
+#####################################
+#Path to the inversion code (example shown)
+EXEI=../tephra2012_inversion
+echo $EXEI
+#
+INPUT=colima_38wgs84z13.xyz
+echo $INPUT
+#
+#Selected wind field 
+WIND=../Jan2013/wind1
+#
+echo $WIND
+#
+#Inversion configuration file
+ICONF=colima38.conf
+echo $ICONF
+#
+#Path to forward model
+EXE=../tephra2-2012 
+echo $EXE
+#
+#Grid file for final forward model
+GRID=../colima.data.grid
+echo $GRID
+#
+#Vent location
+VENT=../colima_vent.xy
+echo $VENT
+
+#Machine file for MPI
+MACHINE=../machines
+echo $MACHINE
+
+#Integration steps for column and particles
+COLUMN=200
+PARTICLE=100
+echo $COLUMN $PARTICLE
+
+#Number of slave nodes to use for inversion
+NODES=6
+echo $NODES
+###############################
+date
+# Do the inversion (example shown)
+RUN="mpirun -np $NODES -hostfile $MACHINE $EXEI $ICONF $INPUT $WIND"
+echo $RUN
+$RUN
+date
+#
+# Generate a plot of the plume model (beta function)
+RUN="perl ../plotting_scripts/plume.gmt.pl plume.dat plume.eps"
+echo $RUN
+$RUN
+#
+# Plot equiline plot (calculated vs. observed)
+RUN="perl ../plotting_scripts/in_vs_out.gmt.pl $INPUT in_vs_out.eps"
+echo $RUN
+$RUN
+#
+# Write out a configuration file for tephra2
+RUN="perl ../plotting_scripts/write_conf.pl parameters.README tephra2.conf $COLUMN $PARTICLE nrmse"
+echo $RUN
+$RUN
+#
+# Generate a wind diagram
+RUN="perl ../plotting_scripts/psrose.gmt.pl wind_levels.out psrose.in psrose0.eps"
+echo $RUN
+$RUN
+#
+# Run the tephra2 forward model
+echo "$EXE tephra2.conf $GRID wind_levels.out >tephra2.out"
+`$EXE tephra2.conf $GRID wind_levels.out >tephra2.out`
+#
+# Parse the output data and create a plotting file
+echo "perl ../plotting_scripts/parse_tephra.out.pl tephra2.out >tephra2.out.xyz"
+`perl ../plotting_scripts/parse_tephra.out.pl tephra2.out >tephra2.out.xyz`
+#
+# Plot a contour map of the tephra deposit from tephra2 model
+RUN="perl ../plotting_scripts/plot_tephra_contours.gmt.pl $INPUT tephra2.out.xyz contours.eps $VENT"
+echo $RUN
+$RUN

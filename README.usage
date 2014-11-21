@@ -1,0 +1,14 @@
+To compile type make
+
+Edit tephra2.conf 
+This is the forward model configuration file.
+
+Edit tephra2-inversion.conf
+This is the inversion configuration file.
+
+Edit the run script. 
+
+USAGE: nohup sh run > nohup.out &
+
+USE: cd tail -f nohup.out
+to view stderr and stdout as it is being saved to this file.
