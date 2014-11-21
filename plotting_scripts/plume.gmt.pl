@@ -24,7 +24,7 @@ my $out = $ARGV[1];
 #our $alpha = $Data[3];
 #our $beta = $Data[4];
 
-print "MAX column height = $max_plume_elevation\nvent elevation = $vent_height\nColumn steps = $col_steps\nalpha = $alpha\nbeta = $beta\n";
+print STDERR "MAX column height = $max_plume_elevation\nvent elevation = $vent_height\nColumn steps = $col_steps\nalpha = $alpha\nbeta = $beta\n";
 
 # GMT
 my $west = 0;
@@ -40,17 +40,19 @@ my $sum_prob = 0.0;
 my $x_norm = 0.0;
 my $cum_prob = 0.0;
 my $x1;
+my $p_out = "column_probabilities";
+open(PROB, " >$p_out") || die("cannot open $p_out: $!");
 printf(STDERR "Vent elevation = %.0f  Max Plume Ht = %.0f  step = %g\n", $vent_height, $max_plume_elevation, $step_norm); 
 
 #First calculate the normalization constant, so that the total probability integrates to 1
 my $prob = plume_pdf2($x_norm, $step_norm, $alpha, $beta, $sum_prob);
 $sum_prob = $prob;
-printf("\nSum of prob: %g\n\n", $sum_prob);
+#printf(STDERR "\nSum of prob: %g\n\n", $sum_prob);
 system "echo '' > points";
 #Now calculate the probability
 my $x = $vent_height;
 $x_norm = 0.0;
-print(STDERR "# x | probability |  Normalized-x | cummulative-probability\n");
+print(PROB "# x | probability |  Normalized-x | cummulative-probability\n");
 for (my $i = 0; $i < $col_steps; $i++) {
      $x += $ht_step_width;
      $x_norm += $step_norm;
@@ -69,7 +71,7 @@ for (my $i = 0; $i < $col_steps; $i++) {
        # This is the total probability and must be equal to 1
        $cum_prob += $prob;
        if ($max_prob < $prob) { $max_prob = $prob; }
-       printf(STDERR "%0.1f\t\t%0.3g\t\t%0.3g\t\t%0.3g\n", $x, $prob, $x1, $cum_prob);
+       printf(PROB "%0.1f\t\t%0.3g\t\t%0.3g\t\t%0.3g\n", $x, $prob, $x1, $cum_prob);
        # GMT - output plot points
        $prob *= 100;
        system "echo $prob $x >> points";
@@ -83,12 +85,12 @@ for (my $i = 0; $i < $col_steps; $i++) {
 $east = $max_prob * 100 + 1;
 $east = 3;
 # GMT - draw basemap
-system "psbasemap  -JX2i/3i -X1i -Y1i -R$west/$east/$south/$north --BASEMAP_TYPE=plain --FRAME_PEN=0.5 --TICK_PEN=0.5 --LABEL_FONT_SIZE=10 --ANNOT_FONT_SIZE=8 --D_FORMAT=%g -Ba1:'probability (%)':/a2000:'Column  (masl)':/:.'':WS -P -V -K > $out";
-system "psxy points -R -JX -W1p,0 -O -K -V >> $out ";
-system "psxy points -Sc.1c -R -G150 -JX -W.25p,0 -O -V >> $out";
+system "psbasemap  -JX2i/3i -X1i -Y1i -R$west/$east/$south/$north --BASEMAP_TYPE=plain --FRAME_PEN=0.5 --TICK_PEN=0.5 --LABEL_FONT_SIZE=10 --ANNOT_FONT_SIZE=8 --D_FORMAT=%g -Ba1:'probability (%)':/a2000:'Column  (masl)':/:.'':WS -P -K > $out";
+system "psxy points -R -JX -W1p,0 -O -K >> $out ";
+system "psxy points -Sc.1c -R -G150 -JX -W.25p,0 -O >> $out";
 #system "psbasemap --BASEMAP_TYPE=plain --FRAME_PEN=0.5 --LABEL_FONT_SIZE=10 --ANNOT_FONT_SIZE=8 --D_FORMAT=%g -JX -R -Ba0.1:'Probability':/a2000:'Column  (masl)':/:.'':WS -V -O >> $out";
 
-system "ps2raster $out -V -A -Tg";
+system "ps2raster $out -A -Tg";
 
 sub plume_pdf2 {
 	my $x_norm = $_[0];
@@ -121,7 +123,7 @@ sub plume_pdf2 {
         $prob = ($x1**($alpha - 1.0)) * ((1.0 - $x1)**($beta - 1.0));
         #printf(STDOUT "[%d]  x=%0.3g\tprob=%0.3g\talpha=%g\tbeta=%g\n", $i, $x, $prob, $alpha, $beta);
       }
-      printf(STDOUT "[%d]  x=%g\tstep = %g\tprob=%g\n", $i, $x, $step,$prob); 
+      #printf(STDERR "[%d]  x=%g\tstep = %g\tprob=%g\n", $i, $x, $step,$prob); 
       $probability += $prob;
 	  }
   } else {
