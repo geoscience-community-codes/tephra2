@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# Edit the pathname for the variable: our $Tephra2_exe
 
 use strict;
 use Tk;
@@ -18,7 +17,7 @@ use Cwd;
 ###########################################################################################
 # Make sure that the location of the tephra2 executable is correctly specified below!
 ############################################################################################
-our $Tephra2_exe = "../tephra2-2012";
+our $Tephra2_exe = "./tephra2-2012";
 our $run_line = "perl survivor_function.pl $Tephra2_exe ";
 #our $num_runs = 1000;
 #our $wind_dir = "wind_db";
