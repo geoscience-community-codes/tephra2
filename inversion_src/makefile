@@ -1,26 +1,38 @@
-CC=`which mpicc`
+CC :=`which mpicc`
 #CC=/usr/bin/mpicc
+UNAME := $(shell uname)
 LBITS := $(shell getconf LONG_BIT)
-ifeq ($(LBITS),64)
-   # do 64 bit stuff here, like set some CFLAGS
-	LIB=../lib64
+ifeq ($(UNAME), Darwin)
+        LIB=../libmac
+else ifeq ($(UNAME),Linux)
+        ifeq ($(LBITS),64)
+                LIB=../lib64
+        else
+                LIB=../lib32
+        endif
 else
-   # do 32 bit stuff here
-	LIB=../lib32
+        UNAME := $(shell uname -o)
+        ifeq ($(UNAME), Cygwin)
+                ifeq ($(LBITS),64)
+                        LIB=../libcygwin64
+                else
+                        LIB=../libcygwin32
+                endif
+        endif
 endif
 
 all:  	tephra2012_inversion
 	mv tephra2012_inversion ..
 
 tephra2012_inversion:		master.o slave.o ameoba.o tephra_inversion.o minimizing_func.o tephra2_calc.o fit_tests.o
-		$(CC)  -O3 -Wall -pthread -o tephra2012_inversion \
+		$(CC)  -O3 -Wall -o tephra2012_inversion \
 		master.o\
 		slave.o\
 		ameoba.o\
 		fit_tests.o -lm\
 		minimizing_func.o -lm\
 		tephra_inversion.o\
-		tephra2_calc.o $(LIB)/gc.a -ldl
+		tephra2_calc.o $(LIB)/libgc.a -ldl
 
 master.o:		master.c ../common_src/parameters.h makefile
 			$(CC) -Wall  -O3 -idirafter ../include -c master.c
