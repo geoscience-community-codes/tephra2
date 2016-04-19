@@ -85,12 +85,13 @@ for (my $i = 0; $i < $col_steps; $i++) {
 $east = $max_prob * 100 + 1;
 $east = 3;
 # GMT - draw basemap
-system "psbasemap  -JX2i/3i -X1i -Y1i -R$west/$east/$south/$north --BASEMAP_TYPE=plain --FRAME_PEN=0.5 --TICK_PEN=0.5 --LABEL_FONT_SIZE=10 --ANNOT_FONT_SIZE=8 --D_FORMAT=%g -Ba1:'probability (%)':/a2000:'Column  (masl)':/:.'':WS -P -K > $out";
-system "psxy points -R -JX -W1p,0 -O -K >> $out ";
-system "psxy points -Sc.1c -R -G150 -JX -W.25p,0 -O >> $out";
+`gmt psbasemap  -JX2i/3i -X1i -Y1i -R$west/$east/$south/$north --MAP_FRAME_TYPE=plain --MAP_FRAME_PEN=0.5 --MAP_TICK_PEN=0.5 --FONT_LABEL=10 --FONT_ANNOT_PRIMARY=8 --FORMAT_FLOAT_OUT=%g -Ba1:'probability (%)':/a2000:'Column  (masl)':/:.'':WS -P -K > $out`;
+
+`gmt psxy points -R -JX -W1p,0 -O -K >> $out`;
+`gmt psxy points -Sc.1c -R -G150 -JX -W.25p,0 -O >> $out`;
 #system "psbasemap --BASEMAP_TYPE=plain --FRAME_PEN=0.5 --LABEL_FONT_SIZE=10 --ANNOT_FONT_SIZE=8 --D_FORMAT=%g -JX -R -Ba0.1:'Probability':/a2000:'Column  (masl)':/:.'':WS -V -O >> $out";
 
-system "ps2raster $out -A -Tg";
+`gmt ps2raster $out -A -Tg`;
 
 sub plume_pdf2 {
 	my $x_norm = $_[0];
