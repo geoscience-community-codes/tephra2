@@ -1,0 +1,33 @@
+combine_reanalysis_data.pl:  The perl script for creating a wind database for tephra modeling. 
+combine_reanalysis_data.conf:  The configuration file.
+
+The wind data comes from NOAA Earth System Research Laboratory
+http://www.esrl.noaa.gov/psd/data/gridded/data.ncep.reanalysis2.html
+
+The first step is to download the wind data from this site and save these files to your computer. The NCEP-DOE Reanalysis 2 descriptions are subdivided into separate files. We use Pressure Level files, 4-times daily Individual Observations. Three files are required:
+
+Geopotential Height (ght)
+U-wind (uwnd)
+V-wind (vwnd)
+
+See:
+http://www.esrl.noaa.gov/psd/cgi-bin/db_search/DBSearch.pl?Dataset=NCEP%2FDOE+AMIP-II+Reanalysis+%28Reanalysis-2%29&Variable=Geopotential+Height&Variable=U-wind&Variable=V-wind&group=1&submit=Search
+
+From this page you will be able to download the data for each of the 3 pressure levels.
+Follow this procedure for each file:
+
+1) Choosing the Pressure Level row, Click->Make plot or subset
+
+2) Now fill out the form:
+    Under Axis Dimension, enter the decimal degrees of the desired location (choose the Begin and End to be the same value).
+    Under Other dimension values, select all 17 wind levels, choose a year, set the beginning to be Jan 1 00Z, set the end to be Dec 31 18Z
+    Under Output options, click->Create a subset without making a plot.
+    At the bottom of the form, Click Button -> Create a subset without making a plot.
+
+3) Now wait .... , a new screen will appear with your data. Click on -> FTP a copy of the file and save the data to your computer.
+
+4) the files are in a format called netCDF. They require a special program to read them: ncdump  You can download this program freely: http://www.esrl.noaa.gov/psd/data/gridded/whatsnetCDF.html
+
+5) The remaining instruction for running the ncdump program and the PERL script can be found in the configuration file: combine_reanalysis_data.conf  Here you need to specify the  names of the output data files after running the ncdump program.
+
+6) Now, to create the wind data base, run the PERL script: perl Combine_reanalysis_data.pl  Keep the configuration file and the data files with the Perl script. A new directory will be created: wind_db  In this directory will be text files of wind data, four files for each day for the year chosen. Any of these files can be used  by tephra2 as the wind data input file.
