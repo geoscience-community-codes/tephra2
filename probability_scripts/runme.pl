@@ -15,7 +15,7 @@ use Data::Dumper;
 use Cwd;
 
 
-our $Tephra2_exe = "./tephra2-2012";
+our $Tephra2_exe = "../tephra2-2012";
 our $run_line = "perl survivor_function.pl $Tephra2_exe ";
 #our $num_runs = 1000;
 #our $wind_dir = "wind_db";
