@@ -280,4 +280,4 @@ sub open_or_die {
 	my ($mode, $filename) = @_;
 	open my $h, $mode, $filename
 		or croak "Could not open '$filename': $!";
-return $h;
+return $h;}
