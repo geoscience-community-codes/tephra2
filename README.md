@@ -1,5 +1,8 @@
 tephra2
 ===================
+01-27-2018
+Formally versioning this version of tephra2 as Version 2.0, to distinguish it from other, earlier versions.
+
 03-12-2014
 Initial upload of the tephra2 probability scripts (perl scripts) which use the tephra2 model of ash dispersion to create survivor curves for specific locations around a volcano.
 
