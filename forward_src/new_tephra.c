@@ -1,3 +1,24 @@
+/*
+tephra2
+
+Copyright (C) 2003  C. Bonadonna, C.B. Connor, L.J. Connor, T. Hincks
+By: C. Bonadonna, C.B. Connor, L.J. Connor, T. Hincks
+
+This file, new_tephra.c, is part of tephra2.
+
+tephra2 is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+tephra2 is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with tephra2.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <math.h>
 #include <stdio.h>
 #include <errno.h>
@@ -6,23 +27,6 @@
 #include <unistd.h>
 #include <gc.h>
 #include "../common_src/prototypes.h"
-
-/*
-Code: new_tephra.c
-By: C.B. & L.J. Connor, T. Hincks, and C. Bonadonna
-Copyright (C) 2003  C.B. Connor, L.J. Connor, C. Bonadonna, T. Hincks
-See: http://www.cas.usf.edu/~cconnor/parallel/tephra/tephra.html
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-*/
 
 /* The following Global Variables are assigned some default values 
 
