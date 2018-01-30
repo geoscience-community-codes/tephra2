@@ -1,3 +1,26 @@
+/*
+Code: tephra2-inversion
+
+Copyright (C) 2004  C. Bonadonna, C.B. Connor, L.J. Connor
+By: C. Bonadonna, C.B. Connor, L.J. Connor
+
+This file, tephra_inversion.c, is part of tephra2-inversion.
+
+tephra2-inversion is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 3
+of the License, or (at your option) any later version.
+
+tephra2-inversion is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with tephra2-inversion.If not, see 
+<http://www.gnu.org/licenses/>.
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,14 +47,11 @@ FILE *in_pts;
 FILE *log_file;
 FILE *wind_file;
 /******************************************************************************************** 
-Program: tephra_inversion.c
-Authors: Laura Connor, Chuck Connor, Costanza Bonadonna
-Date: March 2004
 Language: Ansi C
 
 Purpose: This program will perform an inversion on collected tephra samples to discover the
-         eruption dynamics of the eruption producing the sampled tephra blanket. 
-
+         eruption dynamics of the eruption producing the sampled tephra blanket. It uses
+         the tephra dispersion model, tephra2.
 *********************************************************************************************/
 
 /* 
