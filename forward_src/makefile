@@ -6,7 +6,7 @@ ifeq ($(UNAME), Darwin)
 else ifeq ($(UNAME),Linux)
         CC=`which gcc`
         ifeq ($(LBITS),64)
-                LIB=../lib64
+                #LIB=../lib64
         else
                 LIB=../lib32
         endif
