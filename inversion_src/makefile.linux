@@ -1,0 +1,35 @@
+CC = mpicc
+INCLUDES =
+LIBS = -lm -lgc -ldl
+CFLAGS = -Wall -O3 $(INCLUDES)
+objects = ameoba.o fit_tests.o master.o minimizing_func.o slave.o tephra_inversion.o tephra2_calc.o
+deps = ../common_src/parameters.h ../common_src/prototypes.h ../common_src/common_structures.h makefile.linux
+
+tephra2-inversion_2020: $(objects)
+                $(CC)  $(CFLAGS) -o tephra2-inversion_2020 $(objects) $(LIBS)
+                mv tephra2-inversion_2020 ..
+
+master.o:               master.c $(deps)
+                        $(CC) $(CFLAGS) -c master.c
+
+slave.o:                slave.c $(deps)
+                        $(CC) $(CFLAGS) -c slave.c
+
+ameoba.o:               ameoba.c $(deps)
+                        $(CC) $(CFLAGS) -c ameoba.c
+
+fit_tests.o:            fit_tests.c $(deps)
+                        $(CC) $(CFLAGS) -c fit_tests.c
+                        
+minimizing_func.o:      minimizing_func.c $(deps)
+                        $(CC) $(CFLAGS) -c minimizing_func.c
+
+tephra2_calc.o:         ../common_src/tephra2_calc.c $(deps)
+                        $(CC) $(CFLAGS) -c ../common_src/tephra2_calc.c
+
+tephra_inversion.o:     tephra_inversion.c $(deps)
+                        $(CC) $(CFLAGS) -c tephra_inversion.c
+.PHONY: clean
+clean:
+        rm -vf *.o
+~                       
