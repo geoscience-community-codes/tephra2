@@ -179,37 +179,38 @@ int main(int argc, char *argv[]) { /* MAIN CODE STARTS HERE */
     fprintf(log_file, "\n"); 
 }
   fprintf(log_file, "Finished.\n");
-   fflush(log_file);
+  fflush(log_file);
     
   #endif
     
-    fprintf(stderr,"\nMin Particle Fall Time = %gs\nMax Particle Fall Time = %gs\n",stats.min_falltime, stats.max_falltime);
+  fprintf(stderr,"\nMin Particle Fall Time = %gs\nMax Particle Fall Time = %gs\n",stats.min_falltime, stats.max_falltime);
 	
-	/*phi_bins = (int)((erupt+j)->max_phi - (erupt+j)->min_phi); 
-	if (phi_bins < 1) phi_bins = 1; */
-	bin_width = (e.max_phi - e.min_phi)/PART_STEPS;
-	printf("#EAST NORTH ELEV Kg/m^2 "); 
-	for (bin = 0; bin < PART_STEPS; bin++) 
-	  printf("[%g->%g) ", 
-		e.min_phi + bin_width*bin, 
-		e.min_phi + bin_width*(bin+1));
-	printf("(percent)\n");
+  /*phi_bins = (int)((erupt+j)->max_phi - (erupt+j)->min_phi); 
+  if (phi_bins < 1) phi_bins = 1; */
+  bin_width = (e.max_phi - e.min_phi)/PART_STEPS;
+  printf("#EAST NORTH ELEV Kg/m^2 "); 
+  for (bin = 0; bin < PART_STEPS; bin++) 
+    printf("[%g->%g) ", 
+	e.min_phi + bin_width*bin, 
+	e.min_phi + bin_width*(bin+1));
+  
+  printf("(percent)\n");
 	
-	fprintf(stderr, "PART_STEPS=%d bin_width=%g\n", PART_STEPS, bin_width);
-	for (i=0; i < num_pts; i++) {
-	  printf("%.0f %.0f %.0f %g ", 
-		(pt+i)->easting, 
-		(pt+i)->northing,
-		(pt+i)->elevation, 
-		(pt+i)->calculated_mass);
-		/* Print out percent of total */
-	  for (bin=0; bin < PART_STEPS; bin++) {
-	  	val = ((pt+i)->calculated_phi[bin]/(pt+i)->calculated_mass) * 100.0;
-	  	/*fprintf(stderr, "bin = %g mass = %g ", (pt+i)->phi[bin], (pt+i)->mass ); */
-	    printf("%g ", val);
-	  }
-	  printf("\n");
-	}
+  fprintf(stderr, "PART_STEPS=%d bin_width=%g\n", PART_STEPS, bin_width);
+  for (i = 0; i < num_pts; i++) {
+    printf("%.0f %.0f %.0f %g ", 
+	(pt+i)->easting, 
+	(pt+i)->northing,
+	(pt+i)->elevation, 
+	(pt+i)->calculated_mass);
+	/* Print out percent of total */
+    for (bin = 0; bin < PART_STEPS; bin++) {
+      val = ((pt+i)->calculated_phi[bin]/(pt+i)->calculated_mass) * 100.0;
+      /*fprintf(stderr, "bin = %g mass = %g ", (pt+i)->phi[bin], (pt+i)->mass ); */
+      printf("%g ", val);
+    }
+    printf("\n");
+  }
   print_for_stats(0); 
   fprintf(log_file, "Finished.\n");
   exit_now(0);
@@ -227,10 +228,8 @@ void print_for_stats(double val) {
 	    strerror(errno));
     out = stdout;
   }
-	fprintf (out, "%.0f %.0f  %d %g %g", e.max_plume_elevation, e.vent_elevation, (int) COL_STEPS, e.alpha, e.beta);
-
+  fprintf (out, "%.0f %.0f  %d %g %g", e.max_plume_elevation, e.vent_elevation, (int) COL_STEPS, e.alpha, e.beta);
   if (out != stdout) fclose(out);
-
 }
 
 
@@ -260,9 +259,8 @@ int get_points(FILE *in) {
 
  /* local_n = num_pts;*/
   
-
 #ifdef _PRINT  
-    fprintf(log_file, "Total locations: %d.\n", num_pts);
+  fprintf(log_file, "Total locations: %d.\n", num_pts);
 #endif    
   
   pt = (POINT *)GC_MALLOC((size_t)num_pts * sizeof(POINT));
@@ -276,7 +274,7 @@ int get_points(FILE *in) {
 	  local_n, my_start);
 #endif    
    
-  i=0;
+  i = 0;
   while (i < num_pts) {
     fgets(line, MAX_LINE, in);
     if (line[0] == '#' || line[0] == '\n') continue;
@@ -288,12 +286,13 @@ int get_points(FILE *in) {
 			  &(pt+pts_read)->elevation),
 	     ret != 3) { 
 	
-	        if (ret == EOF && errno == EINTR) continue;
-	        fprintf(stderr, "[line=%d,ret=%d] Did not read in 3 coordinates:[%s]\n", i+1,ret, strerror(errno));
-	        return -1;
+        if (ret == EOF && errno == EINTR) continue;
+        fprintf(stderr, "[line=%d,ret=%d] Did not read in 3 coordinates:[%s]\n", i+1,ret, strerror(errno));
+        return -1;
       }
       /* Initialize some values in the point structure */
       /*(pt+pts_read)->cum_mass = 0.0; */
+	    
       (pt+pts_read)->calculated_mass = 0.0;
       
       /*(pt+pts_read)->calculated_phi = (double *)GC_MALLOC((size_t)PART_STEPS * sizeof(double));
@@ -301,10 +300,12 @@ int get_points(FILE *in) {
         fprintf(stderr, "Cannot malloc memory for phi_bins:[%s]\n", strerror(errno));
         return -1;
       } */
-      for (j=0; j<PART_STEPS; j++)
-	      (pt+pts_read)->calculated_phi[j] = 0.0;
-	      pts_read++;
-     /* if (i >= my_start) {
+	    
+      for (j = 0; j < PART_STEPS; j++)
+        (pt+pts_read)->calculated_phi[j] = 0.0;
+	      
+      pts_read++;
+      /* if (i >= my_start) {
 	      pts_read++;
 	      if (pts_read == local_n) break;
       } */
@@ -335,11 +336,7 @@ int get_wind(FILE *in) {
   double wind_height, wind_dir, windspeed, dir0, ht0, sp0;
   double level, WIND_INTERVAL;
   
-
   fprintf(log_file,"ENTER[get_wind].\n");
-  #ifdef _PRINT
-#endif
-  
   WIND_INTERVAL = (e.max_plume_elevation - e.vent_elevation)/(double)COL_STEPS;
   
   W = (WIND**)GC_MALLOC((size_t)WIND_DAYS * sizeof(WIND *));
@@ -356,9 +353,9 @@ int get_wind(FILE *in) {
     }
   }
   /* Assume one wind day */
-  i=0;
+  i = 0;
   /* start at the vent */ 
-    level = e.vent_elevation;
+  level = e.vent_elevation;
     
   /* Do for each column step */
   /* j = 0 is for the interval between the vent and the ground.
@@ -370,80 +367,77 @@ int get_wind(FILE *in) {
    W[i][0].wind_height = e.vent_elevation;
     /* fprintf(log_file, "[%d]%f %f %f\n",  0, W[i][j].wind_height, W[i][j].windspeed, W[i][j].wind_direction); */
 	
-    for (j=0; j <= COL_STEPS; j++) { 
-        ht0 = 0.0;
-        dir0 = 0.0;
-        sp0 = 0.0;
+   for (j=0; j <= COL_STEPS; j++) { 
+     ht0 = 0.0;
+     dir0 = 0.0;
+     sp0 = 0.0;
     
-        /* Find wind elevation just greater than current level
+     /* Find wind elevation just greater than current level
            Start scanning the wind file for the best match.
            Each new level starts scanning the file from the beginning.
-        */
-        while (NULL != fgets(line, MAX_LINE, in)) {
-	        if (line[0] == '#') continue;
-	        else {
-	            while (ret = sscanf(line, "%lf %lf %lf", 
-	            &wind_height,
-	            &windspeed,
-	            &wind_dir), ret != 3) { 
-	            	if (ret == EOF && errno == EINTR) continue;
-	              fprintf(stderr, 
-	                "[line=%d,ret=%d] Did not read in 3 parameters:[%s]\n", 
-	                i+1,ret, strerror(errno));
-                  return -1;
-	            }
-	       }
-            /* This is the case where we find the first height that is equal to
-	        * or greater that the level that we are assigning.
-	        */
-            if (wind_height >= level) {
-	            if(wind_height == level) {
-	                W[i][j].wind_direction = wind_dir;
-	                W[i][j].windspeed = windspeed;
-	        
-	            } else { /* interpolate */
-	                W[i][j].wind_direction = 
-	                ((wind_dir - dir0) * (level - ht0) / (wind_height - ht0)) + dir0;
-                    W[i][j].windspeed = 
-	                ((windspeed - sp0) * (level - ht0) / (wind_height - ht0)) + sp0;
-	            }
-	            W[i][j].wind_height = level;
-	            break; /* ready to rescan the file for a match for the next level */
-	        }
-	        /* This is the case where the scanned height is less than the level
-	        * we are assigning.
-	         */
-	        else {
-	        /* Maintain the scanned values for possible interpolation 
-	        * at the next level.
-	        */
-	            ht0 = wind_height;
-	            dir0 = wind_dir;
-	            sp0 = windspeed;
-	        }
+      */
+      while (NULL != fgets(line, MAX_LINE, in)) {
+        if (line[0] == '#') continue;
+        else {
+          while (ret = sscanf(line, "%lf %lf %lf", 
+	        &wind_height,
+	        &windspeed,
+	        &wind_dir), ret != 3) { 
+            if (ret == EOF && errno == EINTR) continue;
+            fprintf(stderr, 
+	           "[line=%d,ret=%d] Did not read in 3 parameters:[%s]\n", 
+	            i+1,ret, strerror(errno));
+            return -1;
+       }
+     }
+     /* This is the case where we find the first height that is equal to
+      * or greater that the level that we are assigning.
+      */
+      if (wind_height >= level) {
+        if (wind_height == level) {
+          W[i][j].wind_direction = wind_dir;
+          W[i][j].windspeed = windspeed;
+        } else { /* interpolate */
+          W[i][j].wind_direction = 
+	         ((wind_dir - dir0) * (level - ht0) / (wind_height - ht0)) + dir0;
+          W[i][j].windspeed = 
+	         ((windspeed - sp0) * (level - ht0) / (wind_height - ht0)) + sp0;
         }
-	  /* If we finish scanning the file and all heights are below the level we are
-	   * currently assigning, then just use the direction and speed
-	   * at the upper-most height.
-	   */
-	  if (!W[i][j].wind_height) {
-	    W[i][j].wind_height = level;
-	    W[i][j].windspeed = sp0;
-	    W[i][j].wind_direction = dir0;
-	  }
-	  /* Go to the next column height */
-	  fprintf(log_file, "[%d] %f %f %f\n", 
+        W[i][j].wind_height = level;
+        break; /* ready to rescan the file for a match for the next level */
+      }
+      /* This is the case where the scanned height is less than the level
+       * we are assigning.
+       */
+      else {
+	/* Maintain the scanned values for possible interpolation 
+	 * at the next level.
+	 */
+        ht0 = wind_height;
+        dir0 = wind_dir;
+        sp0 = windspeed;
+      }  
+    }
+    /* If we finish scanning the file and all heights are below the level we are
+    * currently assigning, then just use the direction and speed
+    * at the upper-most height.
+    */
+    if (!W[i][j].wind_height) {
+      W[i][j].wind_height = level;
+      W[i][j].windspeed = sp0;
+      W[i][j].wind_direction = dir0;
+    }
+    /* Go to the next column height */
+    fprintf(log_file, "[%d] %f %f %f\n", 
 	   j, W[i][j].wind_height, W[i][j].windspeed, W[i][j].wind_direction);
 	   
-	   W[i][j].wind_direction *= DEG2RAD; /* change to radians */
-	  rewind(in); 
-	  level += WIND_INTERVAL; 
+    W[i][j].wind_direction *= DEG2RAD; /* change to radians */
+    rewind(in); 
+    level += WIND_INTERVAL; 
   } 
 
   fprintf(log_file, "\tRead %d wind days with %d wind levels per day.\n", i+1, j);
-  fprintf(log_file, "EXIT[get_wind].\n");
-  #ifdef _PRINT
-#endif	  	  
+  fprintf(log_file, "EXIT[get_wind].\n"); 	  
   return 0;
 }
 
