@@ -32,4 +32,3 @@ tephra_inversion.o:	tephra_inversion.c $(deps)
 .PHONY:			clean
 clean:
 			rm -vf *.o
-~                       
