@@ -5,7 +5,7 @@
 # can be commented out with a # sign.
 #####################################
 #Path to the inversion code (example shown)
-EXEI=inputs/tephra2012_inversion
+EXEI=inputs/tephra2-inversion_2020
 echo $EXEI
 #
 INPUT=inputs/colima_38wgs84z13.xyz
@@ -21,7 +21,7 @@ ICONF=inputs/tephra2-inversion.conf
 echo $ICONF
 #
 #Path to forward model
-EXE=inputs/tephra2-2012 
+EXE=inputs/tephra2_2020 
 echo $EXE
 #
 #Grid file for final forward model
