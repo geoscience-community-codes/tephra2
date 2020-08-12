@@ -1,5 +1,5 @@
 # Some configuration variables
-my $EXEI="tephra2/tephra2012_inversion";
+my $EXEI="tephra2-inversion_2020";
 my $INPUT="ararat_7samples.in";
 my $WIND;
 my $ICONF="tephra2-inversion.conf";
