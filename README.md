@@ -14,7 +14,7 @@ tephra2 is written in C, a compiled language, and must be compiled before it can
 - gc, gc-devel, libatomic_ops(opensuse) or libgc-dev, libgc1c2(ubuntu)
 
 #### WIND DATA
-[How to download NOAA REANALYSIS data](plotting_scripts/readme.wind)
+[How to download NOAA REANALYSIS data to create wind files for tephra2](plotting_scripts/readme.wind)
 
 ### USAGE
 Both the forward model and the inversion model require a configuration file. The configuration file is arranged as a list of keywords followed by their corresponding value(s). The program user can change any of the values; the keywords must not be changed.
