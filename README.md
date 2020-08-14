@@ -8,8 +8,10 @@ Two executables can be compiled, tephra2_2020 (the forward model) and tephra2-in
 ### COMPILING
 tephra2 is written in C, a compiled language, and must be compiled before it can be executed. 
 
-### INSTALL THESE DEPENDENCIES FIRST
-
+### INSTALL THESE DEPENDENCIES BEFORE COMPILING
+- gcc
+- openmpi
+- gc, gc-devel, libatomic_ops(opensuse) or libgc-dev, libgc1c2(ubuntu)
 
 #### wind DATA DEPENDENCIES
 
@@ -24,17 +26,17 @@ where,
 - **tephra2_2020** is the name of the executable
 - **tephra2.conf** is the name of the file of configuration parameters
 - **grid_file** is is a text file of 3 columns separated by spaces following the format: 
-```
-  easting-(UTM)  northing-(UTM)  grid-elevation(m)
-```  
+    ```
+    Easting(m)  Northing(m)  Grid-Elevation(m)
+    ```  
 - **wind file** is a 3-column text file of wind data following the format:
    ```
-   height(masl)  wind-speed(m/s)  wind-direction(wind vector azimuth in degrees)
+   Height(masl)  Wind-Speed(m/s)  Wind-Direction(wind vector azimuth in degrees)
    ```
 - **tephra2.out** is the output file name where the tephra accumulation values will be written, following the format:
-   ```
-   Easting(m)  Northing(m)  Elevation(m)  Mass(kg/m^2) [weight percent of individual grain sizes]
-   ```
+    ```
+    Easting(m)  Northing(m)  Grid-Elevation(m)  Mass(kg/m^2) [weight percent of individual grain sizes]
+    ```
 
 
 ### ADDITIONAL DEPENDENCIES
