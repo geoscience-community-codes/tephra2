@@ -6,12 +6,16 @@ tephra2 (VERSION 2.0) is a tephra dispersion simulation tool, written in C, used
 Two executables can be compiled, tephra2_2020 (the forward model) and tephra2-inversion_2020 (the inversion model). The inversion model requires MPI (Message Passing Interface) libraries and should be run on a compute cluster with multiple compute nodes. 
 
 ### COMPILING
-tephra2 is written in C, a compiled language, and must be compiled before it can be executed. 
+tephra2 is written in C, a compiled language, and must be compiled before it can be executed. See [README](README.usage) for some quickstart instructions. Specifically, to compile the linux executables, in the top level directory, on the command line type:
+```
+make
+```
+This will compile both the forward model and the inversion model. If you do not have *openmpi* installed the inversion model will fail to compile, but the forward model will still be compiled. This is OK if you only want the forward model.
 
 ### INSTALL THESE DEPENDENCIES BEFORE COMPILING
 - gcc
 - openmpi
-- gc, gc-devel, libatomic_ops(opensuse) or libgc-dev, libgc1c2(ubuntu)
+- gc, gc-devel, libatomic_ops (for opensuse linux) or libgc-dev, libgc1c2 (for ubuntu linux)
 
 #### WIND DATA
 [How to download NOAA REANALYSIS data to create wind files for tephra2](plotting_scripts/readme.wind)
@@ -43,7 +47,7 @@ To run the inversion model, at the command line, type:
 mpirun -np nodes -hostfile machines tephra2-inversion_2020 tepha2-inversion.conf data_file wind_file
 ```
 where,
-- **mpirun** is the wrapper script for *gcc* when using openmpi libraries
+- **mpirun** is the wrapper script for *gcc* when using mpi libraries
 - **nodes** is the number of cluster compute nodes to use
 - **machines** is a text file listing the name of each compute node and the number of cpu cores useable on that node ([an example](inputs/machines))
 - **tephra2-inversion_2020** is the executable name
