@@ -55,9 +55,9 @@ where,
 - **wind** is a text file of wind data to use for the inversion (same format as above)
 
 ### ADDITIONAL DEPENDENCIES
--*perl*
--*gmt5*
--*ncdump*
+- *perl*
+- *gmt5*
+- *ncdump*
 
 
 
