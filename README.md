@@ -25,12 +25,12 @@ tephra2_2020 tephra2.conf grid_file wind_file > tephra2.out
 ```
 where,
 - **tephra2_2020** is the name of the executable
-- **tephra2.conf** is the name of the file of configuration parameters
-- **grid_file** is is a text file of 3 columns separated by spaces following the format: 
+- **tephra2.conf** is the name of the file of configuration parameters ([an example](inputs/tephra2.conf))
+- **grid_file** is is a text file of 3 columns separated by spaces ([an example](inputs/colima.data.grid)) following the format: 
     ```
     Easting(m)  Northing(m)  Grid-Elevation(m)
     ```  
-- **wind file** is a 3-column text file of wind data following the format:
+- **wind_file** is a 3-column text file of wind data ([an example](inputs/wind1)) following the format:
    ```
    Height(masl)  Wind-Speed(m/s)  Wind-Direction(wind vector azimuth in degrees)
    ```
@@ -40,19 +40,19 @@ where,
     ```
 To run the inversion model, at the command line, type:
 ```
-mpirun -np nodes -hostfile machines tephra2-inversion_2020 tepha2-inversion.conf data wind
+mpirun -np nodes -hostfile machines tephra2-inversion_2020 tepha2-inversion.conf data_file wind_file
 ```
 where,
 - **mpirun** is the wrapper script for *gcc* when using openmpi libraries
 - **nodes** is the number of cluster compute nodes to use
-- **machines** is a text file listing the name of each compute node and the number of cpu cores useable on that node
+- **machines** is a text file listing the name of each compute node and the number of cpu cores useable on that node ([an example](inputs/machines))
 - **tephra2-inversion_2020** is the executable name
-- **tepha2-inversion.conf** is the file of parameters
-- **data** is a text file of tephra accumulation data from chosen area following the format:
+- **tephra2-inversion.conf** is the file of parameters ([an example](inputs/tephra2-inversion.conf))
+- **data_file** is a text file of tephra accumulation data from chosen area ([an example](inputs/colima_59wgs84z13.xyz)) following the format:
     ```
     Easting(m)  Northing(m)  Grid-elevation(m)  Mass(kg/m^2)
     ```
-- **wind** is a text file of wind data to use for the inversion (same format as above)
+- **wind_file** is a text file of wind data to use for the inversion (same format as above)
 
 ### ADDITIONAL DEPENDENCIES
 - *perl*
