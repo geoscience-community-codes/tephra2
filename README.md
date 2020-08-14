@@ -13,7 +13,8 @@ tephra2 is written in C, a compiled language, and must be compiled before it can
 - openmpi
 - gc, gc-devel, libatomic_ops(opensuse) or libgc-dev, libgc1c2(ubuntu)
 
-#### wind DATA DEPENDENCIES
+#### WIND DATA
+[How to download NOAA REANALYSIS data](plotting_scripts/wind.readme)
 
 ### USAGE
 Both the forward model and the inversion model require a configuration file. The configuration file is arranged as a list of keywords followed by their corresponding value(s). The program user can change any of the values; the keywords must not be changed.
@@ -35,7 +36,7 @@ where,
    ```
 - **tephra2.out** is the output file name where the tephra accumulation values will be written, following the format:
     ```
-    Easting(m)  Northing(m)  Grid-Elevation(m)  Mass(kg/m^2) [weight percent of individual grain sizes]
+    Easting(m)  Northing(m)  Grid-Elevation(m)  Mass(kg/m^2) [weight percent of modeled phi fractions]
     ```
 
 
@@ -55,10 +56,10 @@ where,
 
 
 
-#### versions --
+
 
 =========================================================================
-
+###### versions --
 01-27-2018
 Formally versioning this version of tephra2 as Version 2.0, to distinguish it from other, earlier versions.
 
