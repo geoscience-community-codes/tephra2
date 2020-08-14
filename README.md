@@ -15,7 +15,7 @@ This will compile both the forward model and the inversion model. If you do not 
 ### INSTALL THESE DEPENDENCIES BEFORE COMPILING
 - gcc
 - openmpi
-- gc, gc-devel, libatomic_ops (for opensuse linux) or libgc-dev, libgc1c2 (for ubuntu linux)
+- gc, gc-devel, libatomic_ops (for opensuse linux) or libgc-dev, libgc1c2 (for ubuntu linux) or bdw-gc (mac - homebrew)
 
 #### WIND DATA
 [How to download NOAA REANALYSIS data to create wind files for tephra2](plotting_scripts/readme.wind)
