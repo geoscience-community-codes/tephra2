@@ -38,18 +38,18 @@ open (VWIND, "<$vwind_file") || die ("$!");
 @vwind = <VWIND>;
 
 my $data_ct = -1;
-my $scale = 0;
+my $scale = 1;
 my $offset = 0;
 my $num_levels = 0;
 Loop1: foreach $lev (@level) {
 	($name, $eq, $value) = split " ", $lev;
 	#print "$name $eq $value\n";
-	if ($data_ct >=0) {
+	if ($data_ct >= 0) {
 		($val) = split ",", $name;
 		#chop($name);
 		#print "$name\n";
 		if ($val =~ m/;/ or $val =~ m/}/ or $val =~ m/,/ or $val =~ m/^$/) {
-			print "hgt=$val\n";
+			#print "hgt=$val\n";
 			next Loop1;
 		}
 		$level[$data_ct] = $val * $scale + $offset;
@@ -82,7 +82,7 @@ Loop1: foreach $lev (@level) {
 }
 
 $data_ct = -1;
-$scale = 0;
+$scale = 1;
 $offset = 0;
 Loop2: foreach $uw (@uwind) {
 	($name, $eq, $value) = split " ", $uw;
@@ -119,7 +119,7 @@ Loop2: foreach $uw (@uwind) {
 }
 
 $data_ct = -1;
-$scale = 0;
+$scale = 1;
 $offset = 0;
 Loop3: foreach $vw (@vwind) {
 	($name, $eq, $value) = split " ", $vw;
@@ -153,7 +153,7 @@ Loop3: foreach $vw (@vwind) {
         $offset = $value;
     } 
 }
-$data_ct--;
+# $data_ct--;
 mkdir "wind_db", 0777 unless -d "wind_db";
 my $file_no = 0;
 my $j = $num_levels;
