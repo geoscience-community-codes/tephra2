@@ -29,7 +29,7 @@ void slave(int my_rank, FILE *log_file) {
   for (;;) {
     ret = MPI_Recv( (void *)recv_buffer, NUM_OF_PARAMS, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status );
     if ( recv_buffer[0] == QUIT ) { 
-      fprintf(log_file, "\t[%d]received QUIT . . .",my_rank);
+      fprintf(log_file, "\t[%d]received QUIT . . .\n[%d] ",my_rank, ret);
       break;
     }
     ret = minimizing_func(recv_buffer);
