@@ -55,6 +55,7 @@ double VENT_ELEVATION = 0.0;
 
 int COL_STEPS;
 int PART_STEPS;
+double (*pdf)(double, double, double, double, double);
 
 /*define the following data structures for the code
   full descriptions are found in common_structures.h */

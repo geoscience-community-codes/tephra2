@@ -37,6 +37,7 @@ static int my_count; /* byte count of node's POINT array */
 static int *displ, *recv_ct; /* pointers to arrays of integers based on total number of nodes */
 
 static FILE *log_file;
+double (*fit)(FILE *, int, POINT *);
 
 /****************************************************************
 FUNCTION: test_bounds
