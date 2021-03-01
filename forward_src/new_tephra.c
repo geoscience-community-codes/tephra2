@@ -55,7 +55,6 @@ double VENT_ELEVATION = 0.0;
 
 int COL_STEPS;
 int PART_STEPS;
-double (*pdf)(double, double, double, double, double);
 
 /*define the following data structures for the code
   full descriptions are found in common_structures.h */
@@ -458,8 +457,8 @@ int init_globals(char *config_file) {
   char line[MAX_LINE];
   char space[4] = "\n\t ";
   char *token;
-  
-#ifdef _PRINT  
+ 
+#ifdef _PRINT   
   fprintf(log_file, "ENTER[init_globals].\n");
 #endif
  
@@ -517,15 +516,15 @@ int init_globals(char *config_file) {
       e.plume_model = (int)atoi(token);
       
       if (e.plume_model == 0) {
-	      pdf = plume_pdf0;
+	      e.pdf = &plume_pdf0;
 	      fprintf(stderr, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Uniform Distribution with threshold");
       }
       else if (e.plume_model == 1) {
-	      pdf = plume_pdf1;
+	      e.pdf = &plume_pdf1;
 	      fprintf(stderr, "PLUME_MODEL=[%d]%s\n", e.plume_model, "log-normal Distribution using beta");
       }
       else if (e.plume_model == 2) {
-	      pdf = plume_pdf2;
+	     e.pdf = &plume_pdf2;
 	      fprintf(log_file, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Beta Distribution with ALPHA and BETA parameteres");
       }
     }

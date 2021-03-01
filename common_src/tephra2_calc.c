@@ -650,7 +650,7 @@ void set_eruption_values(ERUPTION *erupt, WIND *wind) { /* set_eruption_values *
     double part_step_width;
     double x_norm, step_norm;
 
-		double pmin=10e6, pmax=0.0;
+    double pmin=10e6, pmax=0.0;
 		
 #ifdef _PRINT
 fprintf(log_file, "IN set_eruption_values ... ");
@@ -695,7 +695,7 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
         cum_prob_col += prob;
     }
     */
-    cum_prob_col = (*pdf)(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
+    cum_prob_col = erupt->pdf (x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
     total_P_col = cum_prob_col;
 
     y = (erupt)->min_phi;
@@ -813,13 +813,16 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
             if (T[i][j].total_fall_time < pmin) pmin = T[i][j].total_fall_time;
             if (x_norm <= (double)0)
                 col_prob =
-                    (*pdf)((x_norm+0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
+                   // (*pdf)((x_norm+0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
+                  erupt-> pdf((x_norm+0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
             else if (x_norm >= (double)1)
                 col_prob =
-                    (*pdf)((x_norm-0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
+                   // (*pdf)((x_norm-0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
+                   erupt->pdf((x_norm-0.001), step_norm, erupt->alpha, erupt->beta, total_P_col);
             else
                 col_prob =
-                    (*pdf)(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
+                  //  (*pdf)(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
+                  erupt->pdf(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
                     
  /*fprintf(log_file, "[%d][%d] %.2f %.2f %g %g %g\n", i,j, x, x_norm, col_prob, part_prob, total_P); */
  

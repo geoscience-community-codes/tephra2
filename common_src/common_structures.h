@@ -70,6 +70,7 @@ typedef struct {
 
   /* double duration; => duration of the sustained phase of eruption; this is calculated from the empirical power-law eq. 
                       total_erupted_mass = density of fallout deposit * ( plume_height/1670)^4 * duration */ 
+  double (*pdf)(double, double, double, double, double);
 } ERUPTION;
 
 typedef struct {

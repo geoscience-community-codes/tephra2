@@ -132,15 +132,15 @@ int init_globals(char *config_file) {
       e.plume_model = (int)atoi(token);
 
       if (e.plume_model == 0) {
-        pdf = plume_pdf0;
+       e.pdf = &plume_pdf0;
         fprintf(log_file, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Uniform Distribution with threshold");
       }
       else if (e.plume_model == 1) {
-        pdf = plume_pdf1;
+        e.pdf = &plume_pdf1;
         fprintf(log_file, "PLUME_MODEL=[%d]%s\n",e.plume_model, "log-normal Distribution using beta");
       }
       else if (e.plume_model == 2) {
-        pdf = plume_pdf2;
+       e.pdf = &plume_pdf2;
         fprintf(log_file, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Beta distribution with alpha and beta parameters");
       }
     }
