@@ -3,8 +3,8 @@
 #include "parameters.h"
 #include "common_structures.h"
 
-extern  double (*fit)(FILE *, int, POINT *);
-extern double (*pdf)(double, double, double, double, double);
+// extern  double (*fit)(FILE *, int, POINT *);
+// extern double (*pdf)(double, double, double, double, double);
 void optimize_params(double [][NUM_OF_PARAMS], double [], double, double (*funk)(double []), int *);
 double minimizing_func(double []);
 void test_bounds(int, double *, double);

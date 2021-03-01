@@ -37,7 +37,7 @@ static int my_count; /* byte count of node's POINT array */
 static int *displ, *recv_ct; /* pointers to arrays of integers based on total number of nodes */
 
 static FILE *log_file;
-double (*fit)(FILE *, int, POINT *);
+//double (*fit)(FILE *, int, POINT *);
 
 /****************************************************************
 FUNCTION: test_bounds
@@ -148,15 +148,15 @@ int init_globals(char *config_file) {
       token = strtok_r(NULL, space,ptr1);
       FIT_TEST = (int)atoi(token);
       if (FIT_TEST == CHI2) {
-        fit = chi_squared;
+       e.fit = &chi_squared;
         fprintf(log_file, "Goodness-of-fit test=[%d]%s\n", FIT_TEST, "chi-squared test");
       }
       else if (FIT_TEST == RMSE) {
-        fit = rmse;
+        e.fit = &rmse;
         fprintf(log_file, "Goodness-of-fit test=[%d]%s\n", FIT_TEST, "root-mean-squared-error test");
       }
       else if (FIT_TEST == LOG_TEST) {
-      	fit = log_test;
+      	e.fit = &log_test;
       	fprintf(log_file, "Goodness-of-fit test=[%d]%s\n", FIT_TEST, "Tokyo log test");
       }
     }
@@ -577,7 +577,8 @@ double minimizing_func(double param[]) {
 			MPI_COMM_WORLD), !ret)	{
     if ( !my_rank ) {
       /* Only the master node calculates a new chi_value */
-      chi_calc = (*fit)(log_file, num_pts, p_all);
+      //chi_calc = (*fit)(log_file, num_pts, p_all);
+      chi_calc = e.fit(log_file, num_pts, p_all);
       /* fprintf(stderr,"CHI=%f\n", chi_calc); */
     } else
       chi_calc = 0.0;
