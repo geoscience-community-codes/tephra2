@@ -1,21 +1,28 @@
 CC = gcc
 INCLUDES =
-CFLAGS = -Wall -O3 $(INCLUDES)
+# To print extra output to LOG_ uncomment the next line
+
+ALL_CFLAGS = -Wall -O3 $(INCLUDES) $(CFLAGS)
 LIBS = -lm -lgc -ldl
 objects = new_tephra.o tephra2_calc.o
 deps = ../common_src/parameters.h ../common_src/common_structures.h makefile.linux
 
 tephra2_2020:	$(objects)  $(deps)
-		$(CC) $(CFLAGS) -o tephra2_2020 new_tephra.o tephra2_calc.o $(LIBS)
-		mv tephra2_2020 ../tephra2_2020
+		$(CC) $(ALL_CFLAGS) -o tephra2_2020 new_tephra.o tephra2_calc.o $(LIBS)
 
 new_tephra.o:	new_tephra.c $(deps)
-		$(CC) $(CFLAGS) -c new_tephra.c
+		$(CC) $(ALL_CFLAGS) -c new_tephra.c
 
 tephra2_calc.o:	../common_src/tephra2_calc.c $(deps)
-		$(CC) $(CFLAGS) -c ../common_src/tephra2_calc.c $(LIBS)
+		$(CC) $(ALL_CFLAGS) -c ../common_src/tephra2_calc.c $(LIBS)
 
-.PHONY:		clean
+.PHONY:		clean install uninstall
 clean:
 		rm -fv *.o
+
+install:
+	install -d $(HOME)/bin
+	install -m 0755 tephra2_2020 $(HOME)/bin
                 
+uninstall:
+	rm -fv $(HOME)/bin/tephra2_2020
