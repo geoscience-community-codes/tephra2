@@ -643,6 +643,9 @@ void set_eruption_values(ERUPTION *erupt, WIND *wind) { /* set_eruption_values *
     double total_P_col=0.0, total_P_part=0.0, cum_prob_part=0.0, cum_prob_col=0.0, total_P=0.0;
     double cum_fall_time = 0.0, wind_x, wind_y, ht_above_vent, temp;
     double prob =0.0, col_prob, part_prob;
+#ifdef LOG_
+    double log_demon1_total=0.0;
+#endif 
 
     double ht_section_width;
     double part_section_width;
@@ -652,16 +655,17 @@ void set_eruption_values(ERUPTION *erupt, WIND *wind) { /* set_eruption_values *
 
     double pmin=10e6, pmax=0.0;
 		
-#ifdef _PRINT
+#ifdef LOG_
 fprintf(log_file, "IN set_eruption_values ... ");
 #endif
 
-   /* PART_STEPS = (erupt->max_phi - erupt->min_phi) * 10; 
+   /* PART_STEPS = (erupt->max_phi - erupt->min_phi) * 10; */ 
     
-#ifdef _PRINT
-printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
+#ifdef LOG_
+fprintf(log_file, "Particle Steps = %d\n", (int)PART_STEPS);
+fprintf(log_file, "Column Steps = %d\n", (int)COL_STEPS);
 #endif
-  */
+ 
     /* PLUME_THRESHOLD = erupt->plume_ratio * (erupt->max_plume_elevation - erupt->vent_elevation); replaced 2-22-2011 */
     PLUME_THRESHOLD = erupt->vent_elevation + (erupt->plume_ratio * (erupt->max_plume_elevation - erupt->vent_elevation)); /*new line 2-22-2011 */
     SQRT_TWO_PI = sqrt(2.0 * pi); /* new line,2-22-2011 */
@@ -746,7 +750,10 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
             }
         }
     }
-
+#ifdef LOG_    
+    fprintf(log_file,
+                "PhiSize\tColHeight\tColProb\tPartProb\tMassFrac\n");
+#endif    
     /* Start with the maximum particle size */
     y = (erupt)->min_phi;
     for (i = 0; i < PART_STEPS; i++) { /* PART_STEPS_LOOP */
@@ -824,7 +831,7 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
                   //  (*pdf)(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
                   erupt->pdf(x_norm, step_norm, erupt->alpha, erupt->beta, total_P_col);
                     
- /*fprintf(log_file, "[%d][%d] %.2f %.2f %g %g %g\n", i,j, x, x_norm, col_prob, part_prob, total_P); */
+/*fprintf(stderr, "[%d][%d] %.2f %.2f %g %g %g\n", i,j, x, x_norm, col_prob, part_prob, total_P); */
  
             /* Normalization is now done here */
               T[i][j].demon1 = (erupt->total_ash_mass * col_prob  * part_prob)/total_P;
@@ -840,7 +847,14 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
             }*/
             
             T[i][j].particle_ht = x;
-/*            
+#ifdef LOG_	    
+	    log_demon1_total += T[i][j].demon1;
+
+	    fprintf(log_file,
+		"%.2lf\t%.2lf\t\t%.8lf\t%.8lf\t%.2lf\n",
+		y,x,(col_prob/total_P_col),(part_prob/total_P_part),T[i][j].demon1);
+#endif
+	    /*            
             fprintf(log_file,
 	      "[%d][%d]%g %g %g %g %g %g %g %g %g %g\n",
 	      i,j,
@@ -860,7 +874,11 @@ printf(log_file, "PART_STEPS=%d\n", PART_STEPS);
         y += part_step_width;   /* moved from beg of loop 2-22-2011 */
         
     } /* END PART_STEPS_LOOP */
-
+#ifdef LOG_
+    fprintf(log_file,
+	"Compare Total Mass (kg): %g (sum mass fractions)\t%g (input)\n",
+	log_demon1_total, erupt->total_ash_mass);
+#endif
 	/*fprintf(log_file, "MIN particle fall time = %.0f\n", pmin);
 	fprintf(log_file, "MAX particle fall time = %.0f\n", pmax);
 */
