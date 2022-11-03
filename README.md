@@ -17,9 +17,6 @@ This will compile both the forward model and the inversion model. If you do not 
 - openmpi
 - gc, gc-devel, libatomic_ops (for opensuse linux) or libgc-dev, libgc1c2 (for ubuntu linux) or bdw-gc (mac - homebrew)
 
-#### WIND DATA
-[How to download NOAA REANALYSIS data to create wind files for tephra2](plotting_scripts/readme.wind)
-
 ### USAGE
 Both the forward model and the inversion model require a configuration file. The configuration file is arranged as a list of keywords followed by their corresponding value(s). The program user can change any of the values; the keywords must not be changed.
 
@@ -59,9 +56,9 @@ where,
 - **wind_file** is a text file of wind data to use for the inversion (same format as above)
 
 ### ADDITIONAL DEPENDENCIES
-- *perl*
-- *gmt5*
-- *ncdump*
+- *perl* (needed if perl scripts are used)
+- *gmt5 or gmt6* (needed if gmt is used for plotting output)
+- *ncdump* (sometime needed for processing wind files from NOAA REANALYSIS projects)
 
 
 
