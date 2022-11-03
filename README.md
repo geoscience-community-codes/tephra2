@@ -10,11 +10,14 @@ tephra2 is written in C, a compiled language, and must be compiled before it can
 ```
 make
 ```
-This will compile both the forward model and the inversion model. If you do not have *openmpi* installed the inversion model will fail to compile, but the forward model will still be compiled. This is OK if you only want the forward model.
+This will compile the forward model. The inversion model compiling directions have been commented out. To compile with extra testing output printed to the logfile (log_), on the command line type:
+```
+make clean 
+make --CFLAGS="-D LOG_"
+```
 
 ### INSTALL THESE DEPENDENCIES BEFORE COMPILING
 - gcc
-- openmpi
 - gc, gc-devel, libatomic_ops (for opensuse linux) or libgc-dev, libgc1c2 (for ubuntu linux) or bdw-gc (mac - homebrew)
 
 ### USAGE
@@ -44,6 +47,10 @@ where,
 - *perl* (needed if perl scripts are used)
 - *gmt5 or gmt6* (needed if gmt is used for plotting output)
 - *ncdump* (sometime needed for processing wind files from NOAA REANALYSIS projects)
+- *mpi* (needed to compile and run the inversion executable)
+
+### Inversion with tephra2
+- see the branch tephra2-inversion for more details 
 
 
 
