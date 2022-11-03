@@ -1,7 +1,7 @@
 /* parameters.h */
 /* Define the physical constants used in the new_tephra.c code */
 
-#define LOG_FILE "node_"
+#define LOG_FILE "log_"
 #define ERROR -1
 /* #define DEBUG 1 */
 /* #define _PRINT 1 */
