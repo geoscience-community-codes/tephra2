@@ -46,10 +46,10 @@ mpirun -np nodes -hostfile machines tephra2-inversion_2020 tepha2-inversion.conf
 where,
 - **mpirun** is the wrapper script for *gcc* when using mpi libraries
 - **nodes** is the number of cluster compute nodes to use
-- **machines** is a text file listing the name of each compute node and the number of cpu cores useable on that node ([an example](inputs/machines))
+- **machines** is a text file listing the name of each compute node and the number of cpu cores useable on that node.
 - **tephra2-inversion_2020** is the executable name
-- **tephra2-inversion.conf** is the file of parameters ([an example](inputs/tephra2-inversion.conf))
-- **data_file** is a text file of tephra accumulation data from chosen area ([an example](inputs/colima_59wgs84z13.xyz)) following the format:
+- **tephra2-inversion.conf** is the file of configuration parameters
+- **data_file** is a text file of tephra accumulation data from chosen area following the format:
     ```
     Easting(m)  Northing(m)  Grid-elevation(m)  Mass(kg/m^2)
     ```
