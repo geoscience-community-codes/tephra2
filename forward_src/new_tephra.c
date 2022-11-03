@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) { /* MAIN CODE STARTS HERE */
     
   #endif
     
-  fprintf(stderr,"\nMin Particle Fall Time = %gs\nMax Particle Fall Time = %gs\n",stats.min_falltime, stats.max_falltime);
+  fprintf(log_file,"\nMin Particle Fall Time = %gs\nMax Particle Fall Time = %gs\n",stats.min_falltime, stats.max_falltime);
 	
   /*phi_bins = (int)((erupt+j)->max_phi - (erupt+j)->min_phi); 
   if (phi_bins < 1) phi_bins = 1; */
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) { /* MAIN CODE STARTS HERE */
   
   printf("(percent)\n");
 	
-  fprintf(stderr, "PART_STEPS=%d bin_width=%g\n", PART_STEPS, bin_width);
+  fprintf(log_file, "PART_STEPS=%d bin_width=%g\n", PART_STEPS, bin_width);
   for (i = 0; i < num_pts; i++) {
     printf("%.0f %.0f %.0f %g ", 
 	(pt+i)->easting, 
@@ -314,10 +314,7 @@ int get_points(FILE *in) {
   }
   fprintf(log_file,"EXIT[get_points]:Read %d points.\n",
 	  pts_read);
-  
-#ifdef _PRINT  
-  fprintf(log_file, "EXIT[get_points].\n");
-#endif		  
+
   return 0;
 }
 
@@ -436,8 +433,10 @@ int get_wind(FILE *in) {
     level += WIND_INTERVAL; 
   } 
 
-  fprintf(log_file, "\tRead %d wind days with %d wind levels per day.\n", i+1, j);
-  fprintf(log_file, "EXIT[get_wind].\n"); 	  
+  fprintf(log_file, "\tUsing %d wind levels.\n", j);
+#ifdef _PRINT
+  fprintf(log_file, "EXIT[get_wind].\n");
+#endif  
   return 0;
 }
 
@@ -479,37 +478,37 @@ int init_globals(char *config_file) {
       e.diffusion_coefficient = strtod(token, NULL);
       /* DIFFUSION_COEFFICIENT can never be 0 as it is used in divisions */
       if (e.diffusion_coefficient < 1.0) e.diffusion_coefficient = 1.0;
-      fprintf(stderr, "DIFFUSION_COEFFICIENT=%.0f\n", e.diffusion_coefficient);
+      fprintf(log_file, "DIFFUSION_COEFFICIENT=%.0f\n", e.diffusion_coefficient);
     } 
     else if (!strncmp(token, "EDDY_CONST", strlen("EDDY_CONST"))) {
       token = strtok_r(NULL,space,ptr1);
       e.eddy_constant = strtod(token, NULL);
-      fprintf(stderr, "EDDY_CONST=%.2f\n", e.eddy_constant);
+      fprintf(log_file, "EDDY_CONST=%.2f\n", e.eddy_constant);
     }
     else if (!strncmp(token, "FALL_TIME_THRESHOLD", strlen("FALL_TIME_THRESHOLD"))) {
       token = strtok_r(NULL,space,ptr1);
       e.fall_time_threshold = strtod(token, NULL);
-      fprintf(stderr, "FALL_TIME_THRESHOLD=%.0f\n", e.fall_time_threshold);
+      fprintf(log_file, "FALL_TIME_THRESHOLD=%.0f\n", e.fall_time_threshold);
     }
     else if (!strncmp(token, "LITHIC_DENSITY", strlen("LITHIC_DENSITY"))) {
       token = strtok_r(NULL,space,ptr1);
       e.lithic_density = strtod(token, NULL);
-      fprintf(stderr, "LITHIC_DENSITY=%.0f\n", e.lithic_density);
+      fprintf(log_file, "LITHIC_DENSITY=%.0f\n", e.lithic_density);
     }
     else if (!strncmp(token, "PUMICE_DENSITY", strlen("PUMICE_DENSITY"))) {
       token = strtok_r(NULL,space,ptr1);
       e.pumice_density = strtod(token, NULL);
-      fprintf(stderr, "PUMICE_DENSITY=%.0f\n", e.pumice_density);
+      fprintf(log_file, "PUMICE_DENSITY=%.0f\n", e.pumice_density);
     }
     else if (!strncmp(token, "PART_STEPS", strlen("PART_STEPS"))) {
       token = strtok_r(NULL, space, ptr1);
       PART_STEPS = (int)atoi(token);
-      fprintf(stderr, "PART_STEPS = %d\n", PART_STEPS);
+      fprintf(log_file, "PART_STEPS = %d\n", PART_STEPS);
     }
     else if (!strncmp(token, "COL_STEPS", strlen("COL_STEPS"))) {
       token = strtok_r(NULL, space, ptr1);
       COL_STEPS = (int)atoi(token);
-      fprintf(stderr, "COL_STEPS = %d\n", COL_STEPS);
+      fprintf(log_file, "COL_STEPS = %d\n", COL_STEPS);
     }
     else if (!strncmp(token, "PLUME_MODEL", strlen("PLUME_MODEL"))) {
       token = strtok_r(NULL,space,ptr1);
@@ -517,11 +516,11 @@ int init_globals(char *config_file) {
       
       if (e.plume_model == 0) {
 	      e.pdf = &plume_pdf0;
-	      fprintf(stderr, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Uniform Distribution with threshold");
+	      fprintf(log_file, "PLUME_MODEL=[%d]%s\n", e.plume_model, "Uniform Distribution with threshold");
       }
       else if (e.plume_model == 1) {
 	      e.pdf = &plume_pdf1;
-	      fprintf(stderr, "PLUME_MODEL=[%d]%s\n", e.plume_model, "log-normal Distribution using beta");
+	      fprintf(log_file, "PLUME_MODEL=[%d]%s\n", e.plume_model, "log-normal Distribution using beta");
       }
       else if (e.plume_model == 2) {
 	     e.pdf = &plume_pdf2;
@@ -531,63 +530,63 @@ int init_globals(char *config_file) {
     else if (!strncmp(token, "PLUME_RATIO", strlen("PLUME_RATIO"))) {
       token = strtok_r(NULL, space, ptr1);
       e.plume_ratio = strtod(token, NULL);
-      if (!e.plume_model) fprintf(stderr, "PLUME_RATIO = %.2f\n", e.plume_ratio);
+      if (!e.plume_model) fprintf(log_file, "PLUME_RATIO = %.2f\n", e.plume_ratio);
     }
     else if (!strncmp(token, "ALPHA", strlen("ALPHA"))) {
       token = strtok_r(NULL, space, ptr1);
       e.alpha = strtod(token, NULL);
-      if (e.plume_model==2) fprintf(stderr, "ALPHA = %g\n", e.alpha);
+      if (e.plume_model==2) fprintf(log_file, "ALPHA = %g\n", e.alpha);
     }
     else if (!strncmp(token, "BETA", strlen("BETA"))) {
       token = strtok_r(NULL, space, ptr1);
       e.beta = strtod(token, NULL);
-      if (e.plume_model==2) fprintf(stderr, "BETA = %g\n", e.beta);
+      if (e.plume_model==2) fprintf(log_file, "BETA = %g\n", e.beta);
     }
     else if (!strncmp(token, "PLUME_HEIGHT", strlen("PLUME_HEIGHT"))) {
       token = strtok_r(NULL, space, ptr1);
       e.max_plume_elevation = strtod(token, NULL);
-      fprintf(stderr, "PLUME_HEIGHT = %.0f\n", e.max_plume_elevation);
+      fprintf(log_file, "PLUME_HEIGHT = %.0f\n", e.max_plume_elevation);
     }
     else if (!strncmp(token, "ERUPTION_MASS", strlen("ERUPTION_MASS"))) {
       token = strtok_r(NULL, space, ptr1);
       e.total_ash_mass = strtod(token, NULL);
-      fprintf(stderr, "ERUPTION_MASS = %g\n", e.total_ash_mass);
+      fprintf(log_file, "ERUPTION_MASS = %g\n", e.total_ash_mass);
     }
     else if (!strncmp(token, "MAX_GRAINSIZE", strlen("MAX_GRAINSIZE"))) {
       token = strtok_r(NULL, space, ptr1);
       e.min_phi = strtod(token, NULL);
-      fprintf(stderr, "MAX_GRAINSIZE = %g (phi)\n", e.min_phi);
+      fprintf(log_file, "MAX_GRAINSIZE = %g (phi)\n", e.min_phi);
     }
     else if (!strncmp(token, "MIN_GRAINSIZE", strlen("MIN_GRAINSIZE"))) {
       token = strtok_r(NULL, space, ptr1);
       e.max_phi = strtod(token, NULL);
-      fprintf(stderr, "MIN_GRAINSIZE = %g (phi)\n", e.max_phi);
+      fprintf(log_file, "MIN_GRAINSIZE = %g (phi)\n", e.max_phi);
     }
     else if (!strncmp(token, "MEDIAN_GRAINSIZE", strlen("MEDIAN_GRAINSIZE"))) {
       token = strtok_r(NULL, space, ptr1);
       e.mean_phi = strtod(token, NULL);
-      fprintf(stderr, "MEDIAN_GRAINSIZE = %g (phi)\n", e.mean_phi);
+      fprintf(log_file, "MEDIAN_GRAINSIZE = %g (phi)\n", e.mean_phi);
     }
     else if (!strncmp(token, "STD_GRAINSIZE", strlen("STD_GRAINSIZE"))) {
       token = strtok_r(NULL, space, ptr1);
       e.sigma_phi = strtod(token, NULL);
       /* if (STD_GRAINSIZE < 1.0) STD_GRAINSIZE = 1.0; */
-      fprintf(stderr, "STD_GRAINSIZE = %g (phi)\n", e.sigma_phi);
+      fprintf(log_file, "STD_GRAINSIZE = %g (phi)\n", e.sigma_phi);
     }
     else if (!strncmp(token, "VENT_EASTING", strlen("VENT_EASTING"))) {
       token = strtok_r(NULL, space, ptr1);
       e.vent_easting = strtod(token, NULL);
-      fprintf(stderr, "VENT_EASTING = %.0f\n", e.vent_easting);
+      fprintf(log_file, "VENT_EASTING = %.0f\n", e.vent_easting);
     }
     else if (!strncmp(token, "VENT_NORTHING", strlen("VENT_NORTHING"))) {
       token = strtok_r(NULL, space, ptr1);
       e.vent_northing = strtod(token, NULL);
-      fprintf(stderr, "VENT_NORTHING = %.0f\n", e.vent_northing);
+      fprintf(log_file, "VENT_NORTHING = %.0f\n", e.vent_northing);
     }
     else if (!strncmp(token, "VENT_ELEVATION", strlen("VENT_ELEVATION"))) {
       token = strtok_r(NULL, space, ptr1);
       e.vent_elevation = strtod(token, NULL);
-      fprintf(stderr, "VENT_ELEVATION = %.0f\n", e.vent_elevation);
+      fprintf(log_file, "VENT_ELEVATION = %.0f\n", e.vent_elevation);
     }
     else continue;
   }
