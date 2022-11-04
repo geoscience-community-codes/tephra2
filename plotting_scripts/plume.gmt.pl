@@ -1,3 +1,9 @@
+# This script plots the plume model based on the beta function 
+# used in tephra2. It uses  
+# an output file from tephra2: the file plume2.dat
+# Plotting is done using GMT version 5.4.
+# The GMT command need to be updated.
+
 use Math::Trig;
 use warnings;
 use strict;
